@@ -1,12 +1,1075 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101a2e"><title>KlassenAmpel 0.3 – Spielwelten & Konsequenzen</title><style>
-:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#f5f7ff;background:#0d1424}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 60% 0%,#253757,#0d1424 65%)}button,select,input{font:inherit}button,select{background:#243450;border:1px solid #52617c;color:white;border-radius:11px;padding:10px 12px;cursor:pointer}button:hover{background:#34496d}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f6d56d}button.primary{background:#366de0;border-color:#729cf8;font-weight:750}button:disabled{opacity:.5;cursor:default}header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}h1{margin:0;font-size:clamp(23px,3vw,34px)}small,.muted{color:#b8c5db}.shell{max-width:1500px;margin:auto;padding:clamp(10px,2vw,24px)}.toolbar,.settings,.stats{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.panel{background:#17243a;border:1px solid #394960;border-radius:17px;padding:14px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px}.world{position:relative;min-height:440px;overflow:hidden;background:#111f37;border-radius:17px;border:1px solid #4c607d}.world canvas{width:100%;height:100%;position:absolute;inset:0}.overlay{position:absolute;inset:0;pointer-events:none;display:flex;justify-content:space-between;flex-direction:column;padding:18px}.world-title{font-weight:800;font-size:clamp(20px,3vw,34px);text-shadow:0 2px 12px #000}.world-sub{color:#e6edff;text-shadow:0 2px 8px #000}.hud{display:flex;gap:9px;flex-wrap:wrap}.pill{background:#091527d9;border:1px solid #6a7b96;border-radius:99px;padding:8px 13px;font-weight:700}.signal{height:14px;border-radius:20px;background:#35465f;overflow:hidden;margin:10px 0}.signal>div{height:100%;width:0%;background:#39d48d;transition:width .25s,background .25s}.lights{display:flex;gap:12px;justify-content:center;margin:12px 0}.light{height:56px;width:56px;border-radius:50%;opacity:.22;border:3px solid #ffffff66}.light.active{opacity:1;box-shadow:0 0 22px currentColor}.green{background:#31d88a;color:#31d88a}.yellow{background:#f5c447;color:#f5c447}.red{background:#ff6474;color:#ff6474}.big{font-size:28px;font-weight:850;text-align:center;margin:6px 0}.row{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:10px 0}.row label{font-size:14px}.row input[type=range]{width:55%;accent-color:#6da7ff}.row select{max-width:62%}.side{display:flex;flex-direction:column;gap:12px}.stat{background:#21314b;border-radius:10px;padding:10px;flex:1;min-width:90px;text-align:center}.stat b{font-size:23px;display:block}.progress{height:13px;background:#34445f;border-radius:20px;overflow:hidden}.progress div{height:100%;background:linear-gradient(90deg,#3acfa3,#f3d16b);transition:width .3s}.footer{margin-top:14px}.notice{font-size:13px;color:#c6d2e5;line-height:1.5}.hidden{display:none!important}.mode-tag{font-size:13px;color:#aee8ff}.flex{display:flex;gap:8px;flex-wrap:wrap}.flex>*{flex:1}#micState{font-size:13px;line-height:1.4;color:#c5d4e9}.demo{background:#51401e;border-color:#c69a45}.world-choices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:14px}.world-choices button{padding:10px 5px;font-weight:700}.world-choices button.selected{background:#325eaa;border:2px solid #9dc6ff}.hint{font-size:12px;color:#b7c8e0}body.projector .shell{max-width:none}body.projector .side,body.projector .world-choices,body.projector header .muted,body.projector .footer{display:none}body.projector .layout{grid-template-columns:1fr}body.projector .world{height:calc(100vh - 140px);min-height:320px}body.projector header{margin-bottom:10px}@media(max-width:800px){.layout{grid-template-columns:1fr}.world{min-height:420px}.world-choices{grid-template-columns:repeat(3,1fr)}.shell{padding:10px}}@media(max-width:440px){.world{min-height:340px}.world-choices{grid-template-columns:repeat(2,1fr)}.light{height:43px;width:43px}.panel{padding:11px}}
-</style></head><body><main class="shell"><header><div><h1>🎮 KlassenAmpel <span class="mode-tag">Version 0.2</span></h1><div class="muted">Gemeinsam konzentriert arbeiten. Gemeinsam eine Welt erschaffen.</div></div><div class="toolbar"><button id="projector">📺 Präsentation</button><button id="fullscreen">⛶ Vollbild</button></div></header>
-<nav class="world-choices" aria-label="Spielwelt wählen"><button data-world="aquarium">🐠 Aquarium</button><button data-world="city">🏙️ Städtebau</button><button data-world="space">🚀 Weltraum</button><button data-world="fantasy">🏰 Fantasy</button><button data-world="nature">🌳 Natur</button></nav>
-<div class="layout"><section class="world" aria-label="Animierte Spielwelt"><canvas id="scene"></canvas><div class="overlay"><div><div class="world-title" id="worldTitle">🐠 Aquarium</div><div class="world-sub" id="worldDesc">Euer Unterwasserreich wächst!</div></div><div class="hud"><div class="pill" id="worldProgress">✨ 0 Entdeckungen</div><div class="pill" id="timeLeft">⏱ 15:00</div><div class="pill" id="pointsBadge">⭐ 0 Punkte</div></div></div></section>
-<aside class="side"><section class="panel"><div class="row"><strong>Unterrichtsmodus</strong><select id="age"><option value="primary">Grundschule</option><option value="college">Berufskolleg</option></select></div><div class="row"><label for="work">Arbeitsform</label><select id="work"><option value="silent">Stillarbeit</option><option value="pair">Partnerarbeit</option><option value="group">Gruppenarbeit</option></select></div><div class="lights" aria-label="Lautstärkeampel"><div class="light green active" id="green"></div><div class="light yellow" id="yellow"></div><div class="light red" id="red"></div></div><div class="big" id="status" aria-live="polite">Bereit</div><div class="signal"><div id="meter"></div></div><div class="row"><span class="muted">Geräuschpegel (relativ)</span><strong id="level">0 %</strong></div><div class="flex"><button class="primary" id="start">🎤 Mikrofon starten</button><button id="demo" class="demo">🧪 Demo</button></div><p id="micState">Noch kein Mikrofon aktiv. Demo funktioniert auch ohne Mikrofon.</p></section>
-<section class="panel"><strong>Spielrunde</strong><div class="row"><label for="duration">Dauer</label><select id="duration"><option value="5">5 Minuten</option><option value="10">10 Minuten</option><option value="15" selected>15 Minuten</option><option value="20">20 Minuten</option><option value="30">30 Minuten</option><option value="45">45 Minuten</option><option value="60">60 Minuten</option></select></div><div class="flex"><button class="primary" id="play">▶ Runde starten</button><button id="reset">↺ Zurücksetzen</button></div><div class="stats" style="margin-top:12px"><div class="stat"><b id="score">0</b><small>Punkte</small></div><div class="stat"><b id="items">0</b><small>Entdeckungen</small></div><div class="stat"><b id="greenPct">–</b><small>Grünzeit</small></div></div><div class="row"><small>Nächste Entdeckung</small><small id="next">0 / 30</small></div><div class="progress"><div id="progress"></div></div><p class="hint">Grün: +1 Punkt pro Sekunde · Gelb: Pause · Rot: Pause. Eine Entdeckung alle 30 Punkte.</p></section>
-<section class="panel"><strong>⚠️ Konsequenzen (optional)</strong><div class="row"><label for="penEnabled">Modul aktiv</label><input type="checkbox" id="penEnabled" checked></div><div class="row"><label for="penPoints">Punkte abziehen</label><input type="checkbox" id="penPoints" checked></div><div class="row"><label for="penWorld">Spielwelt-Rückschritt</label><input type="checkbox" id="penWorld" checked></div><div class="row"><label for="penDelay">Rot seit</label><select id="penDelay"><option value="3">3 Sekunden</option><option value="5" selected>5 Sekunden</option><option value="10">10 Sekunden</option></select></div><div class="row"><label for="penStrength">Stärke</label><select id="penStrength"><option value="mild">Mild</option><option value="medium" selected>Mittel</option><option value="strong">Streng</option></select></div><div class="row"><label for="penCooldown">Pause nach Konsequenz</label><select id="penCooldown"><option value="10">10 Sekunden</option><option value="20" selected>20 Sekunden</option><option value="30">30 Sekunden</option></select></div><p class="hint" id="penStatus" aria-live="polite">Nach 5 Sekunden Rot kann eine Konsequenz folgen.</p><button id="undoPenalty" disabled>↶ Letzte Konsequenz rückgängig</button><p class="hint">Je Unterrichtsmodus getrennt gespeichert. Ein Rückschritt entfernt nur bereits freigeschaltete Elemente; Punkte können nie negativ werden.</p></section><section class="panel"><strong>Empfindlichkeit</strong><div class="row"><label for="sensitivity">Mikrofon-Verstärkung</label><input id="sensitivity" type="range" min="1" max="12" step=".5" value="5"><span id="sensVal">5×</span></div><div class="row"><label for="threshold">Grün bis</label><input id="threshold" type="range" min="10" max="75" value="35"><span id="thVal">35%</span></div><div class="row"><label for="yellowLimit">Gelb bis</label><input id="yellowLimit" type="range" min="20" max="95" value="65"><span id="yellowVal">65%</span></div><button id="calibrate">🎚️ 5 Sek. Grundpegel messen</button><p class="hint" id="calibration">Kalibrierung ermittelt den Grundpegel des Raums. Schwellenwerte lassen sich jederzeit nachregeln.</p></section></aside></div>
-<div class="footer panel"><strong>Hinweise für Lehrkräfte</strong><p class="notice">Die Konsequenzen können im Einstellungsbereich ausgeschaltet werden. Die App verarbeitet Mikrofondaten ausschließlich auf diesem Gerät und speichert keine Tonaufnahmen. Die Pegelanzeige ist relativ und kein geeichtes Dezibelmessgerät. Mikrofonzugriff benötigt normalerweise HTTPS oder localhost und die Freigabe des Browsers. Auf Prowise-Tafeln muss ein Mikrofon verfügbar und im Browser erlaubt sein. Punkte und Spielwelt werden lokal auf dem Gerät gespeichert; Klassen werden nicht geräteübergreifend synchronisiert.</p></div></main>
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102337">
+  <title>KlassenAmpel 0.4</title>
+  <style>
+:root {
+  color-scheme: dark;
+  font: 16px/1.45 "Geist", "Segoe UI", system-ui, sans-serif;
+  color: #f0f7fc;
+  background: #101e2e;
+  --line: #314761;
+  --panel: #192c42;
+  --muted: #b3c9dc;
+  --aqua: #8aead7;
+  --red: #ff8194;
+  --yellow: #ffd76f;
+  --green: #6ee4a8;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: radial-gradient(ellipse at 45% 0, #203d52 0, transparent 65%); min-height: 100vh; }
+main { max-width: 1510px; margin: auto; padding: clamp(12px,2.4vw,34px); }
+button,select { font: inherit; color: inherit; min-height: 42px; }
+button,select {
+  border: 1px solid #48627a; border-radius: 11px; background: #233950;
+  padding: 8px 12px; cursor: pointer;
+}
+button:hover,select:hover { background: #2f4862; }
+:focus-visible { outline: 3px solid #ffd98d; outline-offset: 2px; }
+button[aria-pressed="true"] { border-color: #8fe6d7; background: #254d55; color: #e0fff7; }
+button:disabled,select:disabled { opacity: .64; cursor: default; }
+.primary { background: #a1efdc; color: #112b35; border-color: #c1ffef; font-weight: 750; }
+.primary:hover { background: #c2ffed; }
+h1,h2,p { margin: 0; }
+h1 { font-size: clamp(1.5rem,3.2vw,2.16rem); letter-spacing: -.04em; }
+h1 small { font-size: .48em; color: var(--aqua); letter-spacing: .04em; }
+.masthead,.brand,.actions,.row { display: flex; align-items: center; gap: 10px; }
+.masthead,.row { justify-content: space-between; }
+.masthead { gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.brand p,.hint,footer { color: var(--muted); font-size: .83rem; }
+.brand-lights { display: flex; flex-direction: column; background: #0d1c2c; padding: 8px; gap: 4px; border: 1px solid #48627a; border-radius: 14px; }
+.brand-lights i,.light { display: block; border-radius: 50%; }
+.brand-lights i { width: 8px; height: 8px; background: var(--red); }
+.brand-lights i:nth-child(2) { background: var(--yellow); }
+.brand-lights i:nth-child(3) { background: var(--green); }
+.world-choices { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
+.world-choices button { text-align: start; font-weight: 650; }
+.world-choices span { margin-right: 4px; }
+.layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,324px); gap: 14px; align-items: start; }
+.stage,.side { display: grid; gap: 12px; min-width: 0; }
+.world {
+  overflow: hidden; isolation: isolate; position: relative; display: flex; flex-direction: column;
+  justify-content: space-between; height: clamp(430px,53vw,565px);
+  padding: clamp(13px,2.2vw,28px); border: 1px solid #52758c;
+  border-radius: 22px; background: #135078;
+}
+.world canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
+.world::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg,#09192ad9,transparent 36%,transparent 76%,#09192ab0); }
+.world-heading { display: flex; justify-content: space-between; gap: 6px; align-items: start; }
+.style-name { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: #c9ffe9; font-weight: 800; }
+.world h2 { font-size: clamp(2rem,5vw,4rem); line-height: 1.04; letter-spacing: -.045em; margin-top: 4px; text-shadow: 0 3px 14px #142639; }
+.world-heading p { margin-top: 6px; color: #e0f2ff; font-size: clamp(.8rem,1.55vw,1.02rem); }
+.world-signal {
+  background: #102437ea; border: 1px solid #85a5bd; border-radius: 999px;
+  padding: 6px 10px; white-space: nowrap; font-weight: 750; font-size: .81rem;
+}
+.world-signal::before { content: ""; display: inline-block; width: .6em; height: .6em; border-radius: 50%; background: currentColor; margin-right: .4em; vertical-align: .08em; }
+[data-signal="red"] { color: var(--red); --fill: var(--red); }
+[data-signal="yellow"] { color: var(--yellow); --fill: var(--yellow); }
+[data-signal="green"] { color: var(--green); --fill: var(--green); }
+.hud { display: flex; flex-wrap: wrap; gap: 6px; font-variant-numeric: tabular-nums; }
+.hud div { padding: 5px 10px; background: #102437ee; border: 1px solid #718fa7; border-radius: 12px; }
+.hud span,.stats span { display: block; color: var(--muted); font-size: .7rem; }
+.hud strong { font-size: clamp(.79rem,2.2vw,1.11rem); }
+.pixel .world { border-radius: 5px; }
+.pixel .world canvas { image-rendering: pixelated; }
+.pixel .world h2,.pixel .hud strong,.pixel .style-name { font-family: "IBM Plex Mono", Consolas, monospace; letter-spacing: -.06em; }
+.pixel .hud div,.pixel .world-signal { border-radius: 2px; }
+.panel,.discovery { background: var(--panel); border: 1px solid var(--line); border-radius: 17px; padding: 15px; min-width: 0; }
+.panel h2,summary { font-size: 1.02rem; font-weight: 750; }
+.row { margin-top: 10px; font-size: .88rem; }
+.panel .row select { max-width: 61%; }
+.actions { flex-wrap: wrap; }
+.input-actions,.demo-controls { margin-top: 10px; }
+.input-actions > button,.demo-controls > button { flex: 1 1 auto; font-size: .86rem; }
+.lights { display: flex; gap: 12px; justify-content: center; background: #111f30; border: 1px solid #2e4358; border-radius: 15px; padding: 10px; margin: 10px 0 6px; }
+.light { width: 34px; height: 34px; background: currentColor; opacity: .24; border: 2px solid #ffffff36; }
+.light.active { opacity: 1; box-shadow: 0 0 13px currentColor; }
+#red { color: var(--red); } #yellow { color: var(--yellow); } #green { color: var(--green); }
+#status { text-align: center; font-size: .92rem; font-weight: 750; }
+.reading { color: var(--muted); font-size: .8rem; margin-bottom: 5px; }
+progress { display: block; width: 100%; height: 9px; border: 0; border-radius: 9px; overflow: hidden; background: #0c1e30; accent-color: var(--fill,#8aead7); }
+progress::-webkit-progress-bar { background: #0c1e30; }
+progress::-webkit-progress-value { background: var(--fill,#8aead7); border-radius: 9px; }
+progress::-moz-progress-bar { background: var(--fill,#8aead7); border-radius: 9px; }
+.discovery .row { margin: 0 0 8px; }
+#nextItem,.stats strong { display: block; }
+#next { white-space: nowrap; }
+#announcement { margin-top: 7px; min-height: 1.28em; color: #d7f6ed; font-size: .85rem; }
+.hint { margin-top: 8px; }
+#discoveryTitle { margin: 0; }
+.stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; text-align: center; margin-top: 12px; }
+.stats div { background: #101f31; border-radius: 9px; padding: 6px 3px; }
+.stats strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.settings { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: start; gap: 12px; margin-top: 14px; }
+summary { cursor: pointer; min-height: 25px; }
+input { accent-color: #a1efdc; }
+input[type=checkbox] { width: 20px; height: 20px; }
+input[type=range] { width: 100%; }
+.slider { display: flex; justify-content: space-between; margin-top: 10px; font-size: .88rem; }
+#undoPenalty,#calibrate { margin-top: 8px; }
+footer { margin: 14px 2px 2px; }
+.projector main { max-width: none; }
+.projector .side,.projector nav,.projector .settings,.projector footer,.projector .masthead p { display: none; }
+.projector .layout { grid-template-columns: 1fr; }
+.projector .world { height: calc(100dvh - 190px); min-height: 330px; }
+@media (max-width: 850px) {
+  .layout { grid-template-columns: 1fr; }
+  .side { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .world { height: clamp(370px,58vw,490px); }
+  .settings { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 575px) {
+  .side,.settings { grid-template-columns: 1fr; }
+  .world-choices { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+  .world-choices button { font-size: .79rem; padding-inline: 5px; text-align: center; }
+  .world-choices span { margin: 0; }
+  .world { height: 345px; border-radius: 15px; }
+  .masthead { margin-bottom: 12px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header class="masthead">
+    <div class="brand">
+      <span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+      <div><h1>KlassenAmpel <small>0.4</small></h1><p>Leise arbeiten. Welten entdecken.</p></div>
+    </div>
+    <div class="actions">
+      <button id="projector" aria-pressed="false">Präsentation</button>
+      <button id="fullscreen">Vollbild</button>
+    </div>
+  </header>
+
+  <nav aria-label="Spielwelt wählen" class="world-choices">
+    <button data-world="aquarium"><span aria-hidden="true">🐠</span> Aquarium</button>
+    <button data-world="city"><span aria-hidden="true">🏙️</span> Städtebau</button>
+    <button data-world="space"><span aria-hidden="true">🚀</span> Weltraum</button>
+    <button data-world="fantasy"><span aria-hidden="true">🏰</span> Fantasy</button>
+    <button data-world="nature"><span aria-hidden="true">🌿</span> Natur</button>
+  </nav>
+
+  <div class="layout">
+    <div class="stage">
+      <section class="world" aria-labelledby="worldTitle">
+        <canvas id="scene" aria-hidden="true"></canvas>
+        <div class="world-heading">
+          <div>
+            <div id="styleName" class="style-name">Cartoon</div>
+            <h2 id="worldTitle">Aquarium</h2>
+            <p id="worldDesc">Ein Riff voller Leben</p>
+          </div>
+          <div id="worldSignal" class="world-signal" data-signal="idle">Ampel bereit</div>
+        </div>
+        <div class="hud">
+          <div><span>Restzeit</span><strong id="timeLeft">15:00</strong></div>
+          <div><span>Spielstand</span><strong id="pointsBadge">0 Punkte</strong></div>
+          <div><span>Spielwelt</span><strong id="worldProgress">0 Entdeckungen</strong></div>
+        </div>
+      </section>
+      <section class="discovery" aria-labelledby="discoveryTitle">
+        <div class="row">
+          <div><span id="discoveryTitle" class="hint">Nächste Entdeckung</span><strong id="nextItem">Clownfisch</strong></div>
+          <strong id="next">0 / 30</strong>
+        </div>
+        <progress id="progress" value="0" max="30" aria-labelledby="discoveryTitle"></progress>
+        <p id="announcement" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <aside class="side" aria-label="Steuerung">
+      <section class="panel" aria-labelledby="ampelTitle">
+        <h2 id="ampelTitle">Lautstärkeampel</h2>
+        <div class="lights" aria-hidden="true">
+          <i class="light" id="red"></i><i class="light" id="yellow"></i><i class="light" id="green"></i>
+        </div>
+        <p id="status" aria-live="polite">Bereit</p>
+        <div class="row reading"><label for="meter">Relativer Pegel</label><strong id="level">0 %</strong></div>
+        <progress id="meter" value="0" max="100"></progress>
+        <div class="actions input-actions">
+          <button id="start">Mikrofon starten</button>
+          <button id="demo" aria-pressed="false">Demo</button>
+        </div>
+        <p id="micState" class="hint" aria-live="polite">Starte das Mikrofon oder probiere die Demo.</p>
+        <div id="demoControls" class="actions demo-controls" aria-label="Demofarbe wählen" hidden>
+          <button data-demo="green">Grün</button><button data-demo="yellow">Gelb</button><button data-demo="red">Rot</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="roundTitle">
+        <h2 id="roundTitle">Spielrunde</h2>
+        <div class="row"><label for="duration">Dauer</label>
+          <select id="duration">
+            <option value="5">5 Minuten</option><option value="10">10 Minuten</option>
+            <option value="15" selected>15 Minuten</option><option value="20">20 Minuten</option>
+            <option value="30">30 Minuten</option><option value="45">45 Minuten</option><option value="60">60 Minuten</option>
+          </select>
+        </div>
+        <div class="actions input-actions">
+          <button class="primary" id="play">Runde starten</button><button id="reset">Zurücksetzen</button>
+        </div>
+        <div class="stats"><div><strong id="score">0</strong><span>Punkte</span></div>
+          <div><strong id="items">0</strong><span>Entdeckungen</span></div>
+          <div><strong id="greenPct">–</strong><span>Grünzeit</span></div>
+        </div>
+        <p class="hint">Grün bringt 1 Punkt pro Sekunde. Bei Gelb und Rot pausiert das Sammeln. Alle 30 Punkte wächst die Welt.</p>
+      </section>
+    </aside>
+  </div>
+
+  <div class="settings">
+    <section class="panel" aria-labelledby="teachingTitle">
+      <h2 id="teachingTitle">Unterricht</h2>
+      <div class="row"><label for="age">Unterrichtsmodus</label>
+        <select id="age"><option value="primary">Grundschule</option><option value="college">Berufskolleg</option></select>
+      </div>
+      <div class="row"><label for="work">Arbeitsform</label>
+        <select id="work"><option value="silent">Stillarbeit</option><option value="pair">Partnerarbeit</option><option value="group">Gruppenarbeit</option></select>
+      </div>
+      <p class="hint">Die Arbeitsform stellt die Pegelgrenzen ein. Der Punktestand gilt für alle fünf Welten und beide Grafikstile.</p>
+    </section>
+
+    <details class="panel">
+      <summary>Konsequenzen</summary>
+      <div class="row"><label for="penEnabled">Modul aktiv</label><input type="checkbox" id="penEnabled" checked></div>
+      <div class="row"><label for="penPoints">Punkte abziehen</label><input type="checkbox" id="penPoints" checked></div>
+      <div class="row"><label for="penWorld">Spielwelt-Rückschritt</label><input type="checkbox" id="penWorld" checked></div>
+      <div class="row"><label for="penDelay">Durchgehend Rot</label><select id="penDelay"><option value="3">3 Sekunden</option><option value="5" selected>5 Sekunden</option><option value="10">10 Sekunden</option></select></div>
+      <div class="row"><label for="penStrength">Stärke</label><select id="penStrength"><option value="mild">Mild · 5 Punkte</option><option value="medium" selected>Mittel · 15 Punkte</option><option value="strong">Streng · 30 Punkte</option></select></div>
+      <div class="row"><label for="penCooldown">Schutzpause</label><select id="penCooldown"><option value="10">10 Sekunden</option><option value="20" selected>20 Sekunden</option><option value="30">30 Sekunden</option></select></div>
+      <p id="penStatus" class="hint"></p>
+      <button id="undoPenalty" disabled>Letzte Konsequenz rückgängig</button>
+      <p class="hint">Die Einstellungen werden je Unterrichtsmodus gespeichert. Für den Weltrückschritt kann der Abzug höher ausfallen.</p>
+    </details>
+
+    <details class="panel">
+      <summary>Mikrofon abgleichen</summary>
+      <label class="slider" for="sensitivity">Verstärkung <span id="sensVal">5×</span></label>
+      <input id="sensitivity" type="range" min="1" max="12" step=".5" value="5">
+      <label class="slider" for="threshold">Grün bis <span id="thVal">35 %</span></label>
+      <input id="threshold" type="range" min="10" max="75" value="35">
+      <label class="slider" for="yellowLimit">Gelb bis <span id="yellowVal">65 %</span></label>
+      <input id="yellowLimit" type="range" min="20" max="95" value="65">
+      <button id="calibrate">5 Sek. Grundpegel messen</button>
+      <p id="calibration" class="hint" aria-live="polite">Passe die Pegelgrenzen bei Bedarf an den Raum an.</p>
+    </details>
+  </div>
+  <footer>Die Pegelmessung erfolgt im Browser ohne Tonaufnahmen. Der relative Pegel ist kein Dezibelwert. Spielstand und Profile bleiben im verwendeten Browser.</footer>
+</main>
 <script>
-(()=>{'use strict';const $=id=>document.getElementById(id);const names={aquarium:['🐠 Aquarium','Euer Unterwasserreich wächst!'],city:['🏙️ Städtebau','Errichtet gemeinsam eine Stadt!'],space:['🚀 Weltraum','Erkundet die Galaxie!'],fantasy:['🏰 Fantasy','Baut ein magisches Königreich!'],nature:['🌳 Natur','Lasst einen Wald entstehen!']};const symbols={aquarium:['🐟','🐠','🪸','🐡','🐚','🪼','🐬','🦀'],city:['🏠','🏢','🏬','🏡','🏭','🏫','🏥','🏙️'],space:['⭐','🪐','🚀','🛰️','🌕','☄️','👽','🌟'],fantasy:['🌲','🏰','🧙','🐉','🦄','🗡️','🛡️','✨'],nature:['🌱','🌷','🌳','🍄','🦋','🐿️','🌻','🦊']};let state={world:'aquarium',age:'primary',work:'silent',score:0,remaining:900,running:false,level:0,signal:'green',greenSeconds:0,elapsed:0};try{const saved=JSON.parse(localStorage.getItem('klassenampel-v02')||'{}');if(names[saved.world])state.world=saved.world;if(['primary','college'].includes(saved.age))state.age=saved.age;if(['silent','pair','group'].includes(saved.work))state.work=saved.work;if(Number.isFinite(saved.score)&&saved.score>=0)state.score=Math.min(999999,saved.score)}catch{}let penaltyProfiles={primary:{},college:{}};try{const x=JSON.parse(localStorage.getItem('klassenampel-penalties-v03')||'{}');for(const k of ['primary','college'])if(x[k]&&typeof x[k]==='object')penaltyProfiles[k]=x[k]}catch{}let redDuration=0,cooldownLeft=0,lastPenalty=null;const penIds=['penEnabled','penPoints','penWorld','penDelay','penStrength','penCooldown'];function penConfig(){return {enabled:$('penEnabled').checked,points:$('penPoints').checked,world:$('penWorld').checked,delay:+$('penDelay').value,strength:$('penStrength').value,cooldown:+$('penCooldown').value}}function loadPenalty(){const p={enabled:true,points:true,world:true,delay:5,strength:'medium',cooldown:20,...penaltyProfiles[state.age]};$('penEnabled').checked=p.enabled;$('penPoints').checked=p.points;$('penWorld').checked=p.world;$('penDelay').value=String(p.delay);$('penStrength').value=p.strength;$('penCooldown').value=String(p.cooldown);redDuration=0;cooldownLeft=0;updatePenaltyStatus()}function updatePenaltyStatus(){const p=penConfig();$('penStatus').textContent=!p.enabled?'Konsequenzen ausgeschaltet.':cooldownLeft>0?'Schutzpause: '+Math.ceil(cooldownLeft)+' Sekunden':redDuration>0?'Rot seit '+redDuration.toFixed(1)+' / '+p.delay+' Sekunden':'Nach '+p.delay+' Sekunden durchgehend Rot kann eine Konsequenz folgen.';$('undoPenalty').disabled=!lastPenalty}function applyPenalty(){const p=penConfig();if(!p.enabled||(!p.points&&!p.world))return;const old=state.score;const amount={mild:5,medium:15,strong:30}[p.strength]||15;let loss=0;if(p.points)loss+=amount;if(p.world){const target=Math.floor(old/30);if(target>0)loss=Math.max(loss,old-(target-1)*30-29)}state.score=Math.max(0,old-loss);lastPenalty={before:old,after:state.score,world:state.world};$('penStatus').textContent='Konsequenz: −'+(old-state.score)+' Punkte';save();update()}let stream,ctx,analyser,buffer,source,demo=false,calibrating=false,calibrationValues=[],base=0,last=performance.now(),drawTime=0;const canvas=$('scene'),g=canvas.getContext('2d');function save(){try{localStorage.setItem('klassenampel-v02',JSON.stringify({world:state.world,age:state.age,work:state.work,score:state.score}))}catch{}}function clamp(n,a,b){return Math.max(a,Math.min(b,n))}function secs(s){s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}function thresholds(){const a=+$('threshold').value,b=+$('yellowLimit').value;return [Math.min(a,b-1),Math.max(b,a+1)]}function statusFor(l){const [a,b]=thresholds();return l<a?'green':l<b?'yellow':'red'}function setWorld(w){state.world=w;document.querySelectorAll('[data-world]').forEach(b=>{b.classList.toggle('selected',b.dataset.world===w);b.setAttribute('aria-pressed',b.dataset.world===w)});$('worldTitle').textContent=names[w][0];$('worldDesc').textContent=names[w][1];save();update()}function update(){let n=Math.floor(state.score/30),mod=state.score%30;$('score').textContent=state.score;$('items').textContent=n;$('pointsBadge').textContent='⭐ '+state.score+' Punkte';$('worldProgress').textContent='✨ '+n+' Entdeckungen';$('timeLeft').textContent='⏱ '+secs(state.remaining);$('next').textContent=mod+' / 30';$('progress').style.width=(mod/30*100)+'%';$('greenPct').textContent=state.elapsed?Math.round(state.greenSeconds/state.elapsed*100)+'%':'–';$('level').textContent=Math.round(state.level)+' %';$('meter').style.width=state.level+'%';$('meter').style.background=state.signal==='green'?'#31d88a':state.signal==='yellow'?'#f5c447':'#ff6474';['green','yellow','red'].forEach(c=>$(c).classList.toggle('active',state.signal===c));$('status').textContent=!demo&&!analyser?'Bereit':state.signal==='green'?'🟢 Gut so!':state.signal==='yellow'?'🟡 Etwas leiser':'🔴 Zu laut';$('play').textContent=state.running?'⏸ Pause':'▶ Runde starten'}function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(1,Math.round(r.width*d));canvas.height=Math.max(1,Math.round(r.height*d));g.setTransform(d,0,0,d,0,0)}new ResizeObserver(resize).observe(canvas);function emoji(str,x,y,size,alpha=1){g.save();g.globalAlpha=alpha;g.font=size+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(str,x,y);g.restore()}function scene(t){const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;const theme=state.world,grad=g.createLinearGradient(0,0,0,h);const colors={aquarium:['#045d87','#052344'],city:['#4b72a4','#152039'],space:['#080d30','#1c1b4b'],fantasy:['#6572a4','#27375b'],nature:['#85b9c5','#226b5e']}[theme];grad.addColorStop(0,colors[0]);grad.addColorStop(1,colors[1]);g.fillStyle=grad;g.fillRect(0,0,w,h);const items=Math.min(65,Math.floor(state.score/30));if(theme==='aquarium'){g.fillStyle='#c8a978';g.fillRect(0,h*.87,w,h*.13);for(let i=0;i<22;i++){let x=(i*89+37)%w,y=(i*57+t*.018)%h;g.fillStyle='#b8e6ff45';g.beginPath();g.arc(x,h-y,3+(i%4),0,7);g.fill()}for(let i=0;i<items;i++){let x=35+(i*117)%(Math.max(80,w-70)),y=h*.22+((i*73)%(Math.max(70,h*.57)));emoji(symbols.aquarium[i%8],x+Math.sin(t*.001+i)*10,y+Math.cos(t*.0013+i)*6,27+(i%3)*7)}}else if(theme==='city'){g.fillStyle='#263d4d';g.fillRect(0,h*.83,w,h*.17);g.fillStyle='#48596a';g.fillRect(0,h*.91,w,18);for(let i=0;i<items;i++){let cols=Math.max(2,Math.floor(w/76)),x=42+(i%cols)*(w-84)/cols,y=h*.78-Math.floor(i/cols)*56;emoji(symbols.city[i%8],x,y,42)}for(let i=0;i<6;i++)emoji('☁️',(i*197+t*.009)%(w+100)-50,60+i%3*42,30,.65)}else if(theme==='space'){for(let i=0;i<95;i++){let x=(i*137.51)%w,y=(i*73.73)%h;g.fillStyle='rgba(255,255,255,'+(.25+.5*(.5+.5*Math.sin(t*.002+i)))+')';g.fillRect(x,y,i%9===0?2:1,i%9===0?2:1)}for(let i=0;i<items;i++){let x=45+(i*139)%Math.max(80,w-90),y=90+(i*97)%Math.max(100,h-180);emoji(symbols.space[i%8],x,y+Math.sin(t*.001+i)*5,30+(i%3)*8)}}else if(theme==='fantasy'){g.fillStyle='#2b604f';g.fillRect(0,h*.84,w,h*.16);emoji('🌙',w*.82,h*.19,68);for(let i=0;i<items;i++){let cols=Math.max(2,Math.floor(w/90)),x=40+(i%cols)*(w-80)/cols,y=h*.78-Math.floor(i/cols)*65;emoji(symbols.fantasy[i%8],x,y+Math.sin(t*.001+i)*2,40)}}else{g.fillStyle='#39794c';g.fillRect(0,h*.82,w,h*.18);emoji('☀️',w*.82,h*.16,70);for(let i=0;i<items;i++){let cols=Math.max(2,Math.floor(w/80)),x=40+(i%cols)*(w-80)/cols,y=h*.79-Math.floor(i/cols)*58;emoji(symbols.nature[i%8],x,y+Math.sin(t*.001+i)*2,38)}for(let i=0;i<5;i++)emoji('☁️',(i*215+t*.01)%(w+100)-50,65+i%2*35,35,.7)}if(state.signal==='red'&&(demo||analyser)){g.fillStyle='#ff3e4a16';g.fillRect(0,0,w,h)}else if(state.signal==='green'&&state.running){emoji('✨',w*.5+Math.sin(t*.001)*w*.28,h*.23,30,.7)}}function tick(t){const dt=Math.min(.1,(t-last)/1000);last=t;if(analyser&&buffer){analyser.getByteTimeDomainData(buffer);let sum=0;for(let i=0;i<buffer.length;i++){const v=(buffer[i]-128)/128;sum+=v*v}const rms=Math.sqrt(sum/buffer.length);let val=clamp(Math.max(0,rms-base)*100*(+$('sensitivity').value),0,100);state.level=state.level*.78+val*.22;if(calibrating)calibrationValues.push(rms)}else if(demo){state.level=clamp(48+34*Math.sin(t/1800)+13*Math.sin(t/410),0,100)}else state.level=0;state.signal=statusFor(state.level);if(state.running){const p=penConfig();cooldownLeft=Math.max(0,cooldownLeft-dt);if(p.enabled&&(demo||analyser)&&state.signal==='red'){redDuration+=dt;if(redDuration>=p.delay&&cooldownLeft<=0){applyPenalty();redDuration=0;cooldownLeft=p.cooldown}}else redDuration=0;state.remaining=Math.max(0,state.remaining-dt);state.elapsed+=dt;if(state.signal==='green'&&(demo||analyser)){state.greenSeconds+=dt;state._fraction=(state._fraction||0)+dt;if(state._fraction>=1){const pts=Math.floor(state._fraction);state.score+=pts;state._fraction-=pts;save()}}if(state.remaining<=0){state.running=false;alert('🎉 Die Runde ist beendet! Ihr habt '+state.score+' Punkte gesammelt.')}}if(t-drawTime>100){update();updatePenaltyStatus();drawTime=t}scene(t);requestAnimationFrame(tick)}async function startMic(){if(analyser){stopMic();return}try{if(!navigator.mediaDevices?.getUserMedia)throw Error('Mikrofonzugriff benötigt HTTPS oder localhost.');stopMic();stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();source=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=2048;source.connect(analyser);buffer=new Uint8Array(analyser.fftSize);demo=false;$('demo').classList.remove('demo');$('start').textContent='🎤 Mikrofon stoppen';$('micState').textContent='Mikrofon aktiv. Es werden keine Tonaufnahmen gespeichert.'}catch(e){$('micState').textContent='Mikrofon nicht verfügbar: '+e.message+' – Demo ist weiterhin möglich.';stopMic()}}function stopMic(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;analyser=null;buffer=null;source=null;if(ctx)ctx.close().catch(()=>{});ctx=null;$('start').textContent='🎤 Mikrofon starten'}$('start').onclick=startMic;$('demo').onclick=()=>{if(analyser)stopMic();demo=!demo;$('demo').classList.toggle('demo',!demo);$('demo').textContent=demo?'🧪 Demo beenden':'🧪 Demo';$('micState').textContent=demo?'Demomodus: simulierte Lautstärke, kein Mikrofon erforderlich.':'Demo aus. Mikrofon starten, um echte Geräusche zu messen.'};$('play').onclick=()=>{if(state.remaining<=0)state.remaining=+$('duration').value*60;state.running=!state.running;if(!state.running)redDuration=0;update()};$('reset').onclick=()=>{if(!confirm('Runde und Punkte zurücksetzen?'))return;state.running=false;state.score=0;state._fraction=0;state.remaining=+$('duration').value*60;state.elapsed=0;state.greenSeconds=0;redDuration=0;cooldownLeft=0;lastPenalty=null;save();update()};$('duration').onchange=()=>{if(!state.running){state.remaining=+$('duration').value*60;update()}};$('age').value=state.age;$('work').value=state.work;$('age').onchange=()=>{state.age=$('age').value;loadPenalty();save()};$('work').onchange=()=>{state.work=$('work').value;const vals={silent:[35,65],pair:[48,78],group:[60,88]}[state.work];$('threshold').value=vals[0];$('yellowLimit').value=vals[1];refreshSliders();save()};penIds.forEach(id=>$(id).addEventListener('change',()=>{penaltyProfiles[state.age]=penConfig();try{localStorage.setItem('klassenampel-penalties-v03',JSON.stringify(penaltyProfiles))}catch{}redDuration=0;updatePenaltyStatus()}));$('undoPenalty').onclick=()=>{if(!lastPenalty)return;state.score=lastPenalty.before;lastPenalty=null;redDuration=0;cooldownLeft=20;save();update();updatePenaltyStatus()};function refreshSliders(){$('sensVal').textContent=$('sensitivity').value+'×';$('thVal').textContent=$('threshold').value+'%';$('yellowVal').textContent=$('yellowLimit').value+'%'}['sensitivity','threshold','yellowLimit'].forEach(id=>$(id).oninput=refreshSliders);$('calibrate').onclick=()=>{if(!analyser){$('calibration').textContent='Bitte zuerst das Mikrofon aktivieren.';return}if(calibrating)return;calibrating=true;calibrationValues=[];$('calibrate').disabled=true;$('calibration').textContent='Bitte 5 Sekunden normal leise bleiben …';setTimeout(()=>{calibrating=false;$('calibrate').disabled=false;if(!calibrationValues.length)return;base=calibrationValues.reduce((a,b)=>a+b,0)/calibrationValues.length*.65;$('calibration').textContent='Grundpegel ermittelt. Bitte Lautstärkegrenzen bei Bedarf nachjustieren.'},5000)};$('fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.().catch(()=>{})};$('projector').onclick=()=>{document.body.classList.toggle('projector');$('projector').textContent=document.body.classList.contains('projector')?'⚙️ Einstellungen':'📺 Präsentation'};document.querySelectorAll('[data-world]').forEach(b=>b.onclick=()=>setWorld(b.dataset.world));setWorld(state.world);loadPenalty();refreshSliders();update();requestAnimationFrame(tick)})();
-</script></body></html>
+const worlds = {
+  aquarium: {
+    title: 'Aquarium', cue: 'Ein Riff voller Leben',
+    sky: ['#167fa2','#083660'], ground: ['#246b84','#12465f','#e2a66d'],
+    finds: ['Clownfisch','Korallengarten','Qualle','Schildkröte','Schatztruhe','Mantarochen']
+  },
+  city: {
+    title: 'Städtebau', cue: 'Vom Dorf zur Stadt',
+    sky: ['#4f96d5','#ffd5ad'], ground: ['#6e9b88','#4b8b80','#486761'],
+    finds: ['Wohnhaus','Bäckerei','Stadtpark','Schule','Rathaus','Hochhaus']
+  },
+  space: {
+    title: 'Weltraum', cue: 'Aufbruch ins Sternenmeer',
+    sky: ['#141838','#30245e'], ground: ['#302555','#3b3368','#524b7e'],
+    finds: ['Ringplanet','Mondbasis','Satellit','Observatorium','Komet','Raumstation']
+  },
+  fantasy: {
+    title: 'Fantasy', cue: 'Das Tal der Drachen',
+    sky: ['#665ac0','#f7adba'], ground: ['#7865aa','#4e637f','#334c73'],
+    finds: ['Zauberturm','Pilzdorf','Kristallhain','Burg','Drache','Sternentor']
+  },
+  nature: {
+    title: 'Natur', cue: 'Ein Wald wächst heran',
+    sky: ['#4c96a8','#ffe1a0'], ground: ['#8bb374','#4e9062','#326752'],
+    finds: ['Obstbaum','Blumenwiese','Teich','Bienenstock','Fuchs','Baumhaus']
+  }
+};
+
+function createWorldRenderer(canvas) {
+  const g = canvas.getContext('2d');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let pixel = false;
+  let previous = -1;
+  let previousKey = '';
+  let effect = { at: -5000, count: 0, gain: true };
+  const ink = '#162b46';
+  const warm = ['#ffae6b','#ee7c9c','#fce287','#6cddc8','#b69aff','#8ad9ff'];
+  const retro = ['#ee9866','#e37493','#f5d165','#52c9b1','#a390e7','#78c8e5'];
+  const rnd = i => ((Math.sin(i * 127.1 + 34.2) * 43758.5453) % 1 + 1) % 1;
+  function box(x,y,w,h,color,r=0) {
+    g.fillStyle=color;
+    if (!r || pixel) { g.fillRect(x,y,w,h); return; }
+    g.beginPath(); g.roundRect(x,y,w,h,Math.min(r,w/2,h/2)); g.fill();
+  }
+  function shape(points,color,outline=false) {
+    g.beginPath();
+    points.forEach(([x,y],i)=>i ? g.lineTo(x,y) : g.moveTo(x,y));
+    g.closePath(); g.fillStyle=color; g.fill();
+    if (outline && !pixel) { g.strokeStyle=ink; g.lineWidth=2; g.lineJoin='round'; g.stroke(); }
+  }
+  function oval(x,y,rx,ry,color,outline=false) {
+    if (pixel) {
+      shape([[x-rx,y-ry*.45],[x-rx*.55,y-ry],[x+rx*.55,y-ry],[x+rx,y-ry*.45],
+        [x+rx,y+ry*.45],[x+rx*.55,y+ry],[x-rx*.55,y+ry],[x-rx,y+ry*.45]],color);
+      return;
+    }
+    g.beginPath(); g.ellipse(x,y,rx,ry,0,0,Math.PI*2); g.fillStyle=color; g.fill();
+    if (outline) { g.strokeStyle=ink; g.lineWidth=2; g.stroke(); }
+  }
+  function star(x,y,r,color) {
+    shape([[x,y-r],[x+r*.25,y-r*.24],[x+r,y],[x+r*.25,y+r*.24],
+      [x,y+r],[x-r*.25,y+r*.24],[x-r,y],[x-r*.25,y-r*.24]],color);
+  }
+  function eye(x,y) {
+    if (pixel) { box(x-2,y-2,4,4,ink); return; }
+    oval(x,y,3.5,4,ink); oval(x+1,y-1.4,1.2,1.2,'#fff');
+  }
+  function fish(type,t,c) {
+    const tail = 4*Math.sin(t*7);
+    if (type===2) {
+      for (let i=0;i<4;i++) {
+        shape([[-12+i*8,3],[-8+i*8,3],[-11+i*8+tail,25],[-15+i*8+tail,23]],c);
+      }
+      oval(0,-4,23,17,c,true); box(-22,1,44,7,c,3);
+      eye(-7,-6); eye(7,-6); return;
+    }
+    if (type===5) {
+      shape([[-40,5+tail],[-23,-12],[0,-17],[23,-12],[40,5-tail],[12,9],[0,18],[-12,9]],c,true);
+      shape([[-3,10],[3,11],[-8,36],[-13,38]],c);
+      eye(-7,-9); eye(7,-9); return;
+    }
+    if (type===3) {
+      oval(22,-4,12,9,'#8fe1a6',true);
+      oval(-13,12+tail,6,11,'#8fe1a6'); oval(12,12-tail,6,11,'#8fe1a6');
+      oval(-4,-2,24,15,'#277b6a',true);
+      oval(-5,-4,16,11,'#9cbf64'); eye(25,-6); return;
+    }
+    shape([[-16,0],[-35,-14+tail],[-31,0],[-35,14+tail]],c,true);
+    oval(0,0,24,15,c,true);
+    oval(-7,0,4,12,'#fff3d4');
+    shape([[-6,4],[-18,8],[-5,13],[5,8]],'#ef835e');
+    eye(13,-3);
+    if (!pixel) oval(17,4,3.6,2,'#f38b86');
+  }
+  function plant(t,c,coral=false) {
+    for (let i=-2;i<=2;i++) {
+      const sway = Math.sin(t*2+i)*5;
+      const tip = -20-18*(1-Math.abs(i)/3);
+      shape([[i*5-3,0],[i*10+sway-3,tip*.65],[i*15+sway,tip],
+        [i*10+sway+4,tip*.57],[i*5+4,0]],c);
+      if (coral) oval(i*15+sway,tip,5,6,c);
+    }
+  }
+  function building(type,c) {
+    const height=[35,30,40,48,58,84][type];
+    const width=[43,55,52,64,60,42][type];
+    box(-width/2,-height,width,height,'#fff0cc',4);
+    box(width/2-8,-height,8,height,'#ddaa94');
+    if (type===0 || type===4) {
+      shape([[-width/2-7,-height], [0,-height-24], [width/2+7,-height]],c,true);
+    } else {
+      box(-width/2-3,-height-5,width+6,7,c,3);
+    }
+    for(let y=-height+9;y<-12;y+=13) {
+      for(let x=-width/2+7;x<width/2-8;x+=14) {
+        box(x,y,8,8,'#376d91',2); box(x+1,y+1,5,2,'#8ee0e8');
+      }
+    }
+    box(-5,-14,10,14,c,2);
+    if (type===1) {
+      for (let i=0;i<7;i++) box(-28+i*8,-19,8,7,i%2 ? '#fff3db' : c,2);
+    }
+    if (type===3 || type===4) {
+      box(0,-height-22,2,19,ink);
+      shape([[2,-height-22],[18,-height-20],[2,-height-14]],c);
+    }
+  }
+  function tree(t,c,fruit=false) {
+    box(-4,-32,8,32,'#845847',3);
+    const sway=Math.sin(t*1.7)*2;
+    oval(-10+sway,-29,15,15,'#34776f',true);
+    oval(10+sway,-32,15,17,'#34776f',true);
+    oval(sway,-43,19,20,c,true);
+    oval(-6+sway,-48,9,7,'#ffffff24');
+    if (fruit) for (let i=0;i<5;i++) oval((i-2)*7+sway,-32-i%2*11,3.2,3.2,'#ff8a71');
+  }
+  function craft(t,c,station=false) {
+    if (station) {
+      box(-48,-8,96,16,'#85a6cb',4);
+      for (const x of [-52,31]) {
+        box(x,-18,22,35,'#4e68ae',3);
+        for(let i=0;i<3;i++) box(x+2,-15+i*11,18,2,'#9faffc');
+      }
+      oval(0,0,21,16,c,true); oval(0,0,10,8,'#393774'); oval(-2,-2,4,3,'#a4e9ee');
+      return;
+    }
+    shape([[-15,-2],[-40,-9-Math.sin(t*17)*4],[-33,0],[-43,9],[-15,3]],'#f7a45c');
+    shape([[-15,-7],[-24,-19],[8,-10],[16,4],[-22,15]],c,true);
+    oval(1,0,23,11,'#f4e8d9',true);
+    oval(8,-2,8,6,'#63b8ec'); oval(10,-4,3,2,'#c5fbff');
+  }
+  function turret(h,c) {
+    box(-16,-h,32,h,'#dfb9cb',3); box(8,-h,8,h,'#b382a6');
+    shape([[-21,-h+3],[0,-h-25],[21,-h+3]],c,true);
+    box(-5,-h+10,10,14,'#594169',4);
+    box(-4,-12,8,12,'#7a5480',3);
+  }
+  function dragon(t,c) {
+    const wings=Math.sin(t*6)*14;
+    shape([[-2,2],[-11,-18-wings],[-37,-22-wings],[-27,-7],[-15,-8],[-9,5]],'#da76ab',true);
+    shape([[-12,6],[-28,14],[-44,4],[-37,16],[-18,19],[0,7]],c,true);
+    oval(0,4,18,11,c,true); oval(18,-5,13,11,c,true);
+    shape([[10,-13],[8,-24],[17,-15],[21,-22],[25,-12]],'#f7d786');
+    eye(22,-8);
+  }
+  function fox(t,c) {
+    const step=Math.sin(t*10)*3;
+    oval(-24,0+step,15,8,c,true); oval(-34,-1+step,6,5,'#ffeed2');
+    box(-11,4,5,12+step,ink,2); box(8,4,5,12-step,ink,2);
+    oval(0,1,20,9,c,true);
+    shape([[11,-5],[12,-22],[20,-14],[27,-22],[29,-8],[35,-3],[23,4]],c,true);
+    shape([[21,-6],[33,-3],[24,3]],'#ffeed2'); eye(24,-9);
+  }
+  function object(key,type,t,c,variant) {
+    if (key==='aquarium') {
+      if (type===1) plant(t,c,true);
+      else if (type===4) {
+        box(-22,-20,44,20,'#935a53',6); box(-23,-23,46,8,c,3);
+        box(-4,-15,8,9,'#ffe78a',2); star(0,-29+Math.sin(t*4)*4,6,'#ffe78a');
+      } else fish(type,t,c);
+    } else if (key==='city') {
+      if (type===2) {
+        box(-33,-5,66,8,'#9fce7d',5); tree(t,'#8cce83');
+        box(11,-12,20,4,c,2); box(12,-8,3,5,ink); box(26,-8,3,5,ink);
+      } else building(type,c);
+    } else if (key==='space') {
+      if (type===0) {
+        oval(0,0,25,25,c,true);
+        g.save(); g.rotate(-.32); oval(0,3,41,7,'#ecb8c6'); oval(0,1,34,3,'#6e5088');
+        g.restore();
+        oval(0,-8,20,12,c); oval(-9,-12,7,4,'#ffffff4d');
+      } else if (type===1 || type===3) {
+        box(-32,0,64,5,'#b983d1',3);
+        oval(0,-6,24,17,type===1?'#7dc4d8':c,true);
+        box(-24,-7,48,9,'#e9d8ee',4);
+        if (type===3) shape([[0,-15],[-9,-28],[12,-37],[16,-31],[6,-16]],'#eae3fa',true);
+      } else if (type===4) {
+        shape([[-39,10],[-4,-7],[22,-7],[11,9]],'#8d83e5');
+        oval(12,0,11,9,c); star(14,-1,6,'#fff5d6');
+      } else craft(t,c,true);
+    } else if (key==='fantasy') {
+      if (type===0) turret(62,c);
+      if (type===1) {
+        box(-11,-28,22,28,'#efc6ab',6);
+        oval(0,-30,28,15,c,true); box(-27,-29,54,6,c,3);
+        oval(-9,-33,4,3,'#fff1d5'); oval(9,-38,5,3,'#fff1d5'); box(-4,-14,8,14,ink,4);
+      }
+      if (type===2) {
+        for(let i=-2;i<=2;i++) {
+          const h=30-Math.abs(i)*8;
+          shape([[i*12-6,0],[i*12-8,-h*.55],[i*12,-h],[i*12+7,-h*.5],[i*12+5,0]],c,true);
+          shape([[i*12-1,0],[i*12,-h],[i*12+7,-h*.5],[i*12+5,0]],'#ffffff55');
+        }
+      }
+      if (type===3) {
+        box(-30,-42,60,42,'#dab7c5',3); turret(56,c);
+        g.save(); g.translate(-24,0); turret(34,c); g.translate(48,0); turret(34,c); g.restore();
+      }
+      if (type===4) dragon(t,c);
+      if (type===5) {
+        oval(0,-24,25,31,'#f4d19a',true); oval(0,-24,18,24,'#6766b5');
+        for(let i=0;i<4;i++) star(Math.cos(t*2+i*2)*12,-24+Math.sin(t*2+i*2)*18,3,c);
+      }
+    } else {
+      if (type===0) tree(t,'#7fc185',true);
+      if (type===1) for(let i=0;i<7;i++) {
+        const x=(i-3)*9, y=-8-i%3*7;
+        box(x,y,2,-y,'#9dd589'); oval(x,y,5,5,i%2?c:'#ffbba4'); oval(x,y,2,2,'#ffe396');
+      }
+      if (type===2) {
+        oval(0,-2,35,12,'#83cee0',true);
+        oval(-8,-4,11,1.5,'#dcf8ee'); oval(17,2,8,1.5,'#dcf8ee');
+        plant(t,'#90be78');
+      }
+      if (type===3) {
+        tree(t,'#8dc777');
+        oval(11,-19,10,12,'#f5c180',true);
+        box(4,-19,14,3,'#cf9257',1);
+        oval(22+Math.cos(t*5)*13,-22+Math.sin(t*5)*8,4,2,'#ffe38e');
+      }
+      if (type===4) fox(t,'#ef9266');
+      if (type===5) {
+        tree(t,'#84c389');
+        box(-20,-27,36,23,'#dfae7a',4);
+        shape([[-25,-27],[-2,-45],[21,-27]],c,true); box(-6,-22,11,9,'#634b65',2);
+        for(let i=0;i<6;i++) box(10,-15+i*4,8,1,'#fef2ca');
+      }
+    }
+    if (variant && !(key==='space' && type===4)) star(29,-19,3+variant%4,'#fff2ba');
+  }
+
+  function scenery(key,world,w,h,t,count) {
+    const [far,near,front]=world.ground;
+    const [sky,low]=world.sky;
+    if (pixel) {
+      box(0,0,w,h,sky); box(0,h*.34,w,h*.66,low);
+    } else {
+      const gradient=g.createLinearGradient(0,0,0,h);
+      gradient.addColorStop(0,sky); gradient.addColorStop(1,low);
+      box(0,0,w,h,gradient);
+    }
+    if (key==='space' || key==='aquarium') {
+      const space=key==='space';
+      for(let i=0;i<(space?75:21);i++) {
+        const x=rnd(i)*w, y=space?rnd(i+220)*h:(h+rnd(i+220)*h-t*(8+i%4)%h)%h;
+        const r=1+rnd(i+440)*2.6;
+        if (space && i%11===0) star(x,y,r+2,'#dacbff');
+        else oval(x,y,r,r,space?'#e7e4ff99':'#a6f1f053');
+      }
+      if (!space) {
+        for(let i=0;i<4;i++) {
+          const x=w*(.19+i*.22)+Math.sin(t+i)*11;
+          shape([[x-26,0],[x+14,0],[x+w*.19,h*.82],[x+12,h*.67]],'#a9fffc12');
+        }
+      }
+    } else {
+      const moon=key==='fantasy';
+      oval(w*.78,h*.25,h*.077,h*.077,moon?'#ffddcb':'#fff0b5');
+      for(let i=0;i<5;i++) {
+        const x=(w*rnd(i)+t*(6+i)%(w+130))%(w+130)-65, y=h*(.22+rnd(70+i)*.25);
+        const color=moon?'#f5caeb55':'#fff1dc85';
+        oval(x,y,32,9,color); oval(x-6,y-7,16,12,color);
+      }
+    }
+    for(let layer=0;layer<3;layer++) {
+      const y=h*(.56+layer*.12);
+      if (!pixel && key!=='space') {
+        g.beginPath(); g.moveTo(0,y);
+        for(let i=0;i<6;i++) {
+          g.quadraticCurveTo((i+.5)*w/6,y-h*(.05+rnd(i+layer*40)*.17),(i+1)*w/6,y);
+        }
+        g.lineTo(w,h); g.lineTo(0,h); g.fillStyle=[far,near,front][layer]; g.fill();
+      } else {
+        const points=Array.from({length:13},(_,i)=>[w*i/12,y-h*rnd(i+layer*40)*.12]);
+        shape([...points,[w,h],[0,h]],[far,near,front][layer]);
+      }
+    }
+    if (key==='city') {
+      box(0,h*.77,w,h*.115,'#3b4358');
+      for(let x=0;x<w;x+=30) box(x,h*.824,14,2,'#ecc994');
+    }
+    if (key==='aquarium') for(let i=0;i<9;i++) {
+      g.save(); g.translate(w*rnd(i+120),h*(.82+rnd(i+81)*.10));
+      g.scale(.56,.56); plant(t+i,i%2?'#327f7a':'#44998d'); g.restore();
+    }
+    if (key==='nature') for(let i=0;i<8;i++) {
+      g.save(); g.translate(w*rnd(i+60),h*(.62+rnd(i+81)*.11));
+      g.scale(.39,.39); tree(t+i,i%2?'#6aad7e':'#80b982'); g.restore();
+    }
+    if (key==='space') {
+      for(let i=0;i<7;i++) oval(w*rnd(i+20),h*(.81+rnd(i+50)*.17),9+rnd(i)*14,4,'#3a355e');
+    }
+    if (key==='fantasy') for(let i=0;i<14;i++) {
+      const glow=.45+.5*Math.sin(t*2+i)**2;
+      g.globalAlpha=glow;
+      star(w*rnd(i+111)+Math.sin(t+i)*9,h*(.48+rnd(i+85)*.37),2+rnd(i)*2,'#ffe9ad');
+      g.globalAlpha=1;
+    }
+    if (count>=6) {
+      for(let i=0;i<Math.min(24,count-5);i++) {
+        const x=w*rnd(i+333), y=h*(.38+rnd(i+299)*.52);
+        star(x,y+Math.sin(t*1.7+i)*5,2.5,'#fff0af88');
+      }
+    }
+  }
+
+  function position(key,i,w,h,t) {
+    const type=i%6, district=Math.floor(i/6);
+    const row=district%3;
+    const shift=Math.floor(district/3);
+    let x=w*(.13+type*.148)+row%2*w*.03;
+    let y=h*(.72-row*.14);
+    if (key==='aquarium') {
+      if ([0,2,3,5].includes(type)) {
+        x=((w*rnd(i+41)+t*(16+type*4))%(w+100))-50;
+        y=h*(.39+rnd(i+8)*.29)+Math.sin(t*2+i)*8;
+      } else y=h*(.81-row*.07);
+    }
+    if (key==='space') { y=h*([.40,.76,.51,.72,.34,.55][type]-row*.05)+Math.sin(t+i)*5; }
+    if (key==='fantasy' && type===4) {
+      x=(w*.55+t*32+district*73)%(w+100)-50; y=h*.36+Math.sin(t*2)*12;
+    }
+    if (key==='nature' && type===4) {
+      x=w*.65+Math.sin(t*.55+district)*w*.21; y=h*.8+row*4;
+    }
+    x+=shift ? (rnd(i+80)-.5)*w*.13 : 0;
+    return [x,y];
+  }
+
+  return function render(now,key,isPixel,count) {
+    const cssWidth=canvas.clientWidth, cssHeight=canvas.clientHeight;
+    if (!cssWidth || !cssHeight) return;
+    pixel=isPixel;
+    const density=pixel ? .34 : Math.min(devicePixelRatio||1,2);
+    const width=Math.max(1,Math.round(cssWidth*density));
+    const height=Math.max(1,Math.round(cssHeight*density));
+    if (canvas.width!==width || canvas.height!==height) {
+      canvas.width=width; canvas.height=height;
+    }
+    const group=key+isPixel;
+    if (group!==previousKey) effect={at:-5000,count,gain:true};
+    else if (previous!==count) effect={at:now,count:Math.max(previous,count),gain:count>previous};
+    previous=count;
+    previousKey=group;
+    const t=reduced.matches?0:now/1000;
+    const w=cssWidth,h=cssHeight;
+    g.setTransform(width/w,0,0,height/h,0,0);
+    scenery(key,worlds[key],w,h,t,count);
+    const palette=pixel?retro:warm;
+    const scale=Math.min(1.4,Math.max(.56,w/790));
+    g.save();
+    const actorX=(w*.16+t*30)%(w+120)-60;
+    const actorY=h*(key==='city'?.83:key==='nature'?.76:.53)+Math.sin(t*2)*4;
+    g.translate(actorX,actorY);
+    g.scale(scale,scale);
+    if (key==='aquarium') fish(0,t,'#69d8dd');
+    if (key==='space') craft(t,'#ee91aa');
+    if (key==='fantasy') dragon(t,'#a5b5f5');
+    if (key==='nature') {
+      const flap=5+Math.abs(Math.sin(t*12))*9;
+      oval(-flap*.65,-3,flap,8,'#fed78f'); oval(flap*.65,-3,flap,8,'#f7ac9c');
+      box(-2,-7,4,14,ink,2);
+    }
+    if (key==='city') {
+      box(-20,-13,40,18,'#f6b477',5); box(-11,-21,22,11,'#f6b477',4);
+      box(-6,-19,13,6,'#c6f1fa',2); oval(-12,5,5,5,ink); oval(12,5,5,5,ink);
+    }
+    g.restore();
+    // Each block of 18 discoveries builds a denser district. Later objects
+    // remain visible as details without covering the main landmarks.
+    const visible=Math.min(count,72);
+    const indices=Array.from({length:visible},(_,i)=>i);
+    if (count>visible) indices[visible-1]=count-1;
+    const objects=indices.map((i)=> {
+      const [x,y]=position(key,i,w,h,t);
+      return {i,x,y};
+    }).sort((a,b)=>a.y-b.y);
+    for (const {i,x,y} of objects) {
+      const type=i%6, district=Math.floor(i/6);
+      const settling=!reduced.matches && effect.gain && i===count-1 && now-effect.at<850;
+      const size=scale*(district===0?1:district<3?.73:.36);
+      g.save();
+      g.translate(x,y-(settling?Math.max(0,20*(1-(now-effect.at)/600)):0));
+      g.scale(size,size);
+      object(key,type,t+i,palette[(type+district)%palette.length],district);
+      g.restore();
+    }
+    const age=now-effect.at;
+    if (age>=0 && age<1000 && !reduced.matches && effect.count>0) {
+      const [x,y]=position(key,effect.count-1,w,h,t);
+      g.globalAlpha=1-age/1000;
+      for(let i=0;i<10;i++) {
+        const a=i*Math.PI*2/10, r=14+age*.055;
+        star(x+Math.cos(a)*r,y-16+Math.sin(a)*r,4+i%3,effect.gain?'#fff0a4':'#f691a6');
+      }
+      g.globalAlpha=1;
+    }
+  };
+}
+
+
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const clamp = (value,min,max) => Math.max(min,Math.min(max,value));
+  const DISCOVERY = 30;
+  const profiles = {silent:[35,65],pair:[48,78],group:[60,88]};
+  const levels = ['green','yellow','red'];
+  const modes = ['primary','college'];
+  const penaltyIds = ['penEnabled','penPoints','penWorld','penDelay','penStrength','penCooldown'];
+  const defaults = {enabled:true,points:true,world:true,delay:5,strength:'medium',cooldown:20};
+  const strength = {mild:5,medium:15,strong:30};
+  function read(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
+  }
+  function write(key,value) {
+    try { localStorage.setItem(key,JSON.stringify(value)); } catch {}
+  }
+  const saved = read('klassenampel-v02');
+  const penaltyProfiles = {...read('klassenampel-penalties-v03')};
+  const state = {
+    world:Object.hasOwn(worlds,saved.world)?saved.world:'aquarium',
+    age:modes.includes(saved.age)?saved.age:'primary',
+    work:Object.hasOwn(profiles,saved.work)?saved.work:'silent',
+    score:Number.isFinite(saved.score)?Math.floor(clamp(saved.score,0,999999)):0,
+    remaining:900, elapsed:0, green:0, fraction:0, phase:'ready',
+    level:0, signal:'idle', red:0, cooldown:0, lastPenalty:0, penaltyText:''
+  };
+  let pen = {...defaults};
+  let audio = null, pending = false, base = 0, calibration = null, demo = '';
+  let last=performance.now(), lastUpdate=-1000;
+  const render = createWorldRenderer($('scene'));
+  const format = n => String(n).padStart(2,'0');
+  const discoveries = () => Math.floor(state.score/DISCOVERY);
+  const hasInput = () => Boolean(demo || (audio?.ctx.state==='running' && !audio.track.muted && audio.track.readyState==='live'));
+
+  function save() {
+    const {world,age,work,score}=state;
+    write('klassenampel-v02',{world,age,work,score});
+  }
+  function announce(message) { $('announcement').textContent=message; }
+  function update() {
+    const total=discoveries(), mod=state.score%DISCOVERY, time=Math.ceil(state.remaining);
+    const label={idle:'Bereit',green:'Grün · passende Lautstärke',yellow:'Gelb · etwas leiser',red:'Rot · zu laut'}[state.signal];
+    const finds=worlds[state.world].finds;
+    const findName=i=>finds[i%finds.length]+(i>=finds.length?' · Gebiet '+(1+Math.floor(i/finds.length)):'');
+    $('worldProgress').textContent=total+' Entdeckungen';
+    $('worldDesc').textContent=total?'Zuletzt entdeckt · '+findName(total-1):worlds[state.world].cue;
+    $('timeLeft').textContent=format(Math.floor(time/60))+':'+format(time%60);
+    $('pointsBadge').textContent=state.score+' Punkte';
+    $('score').textContent=state.score;
+    $('items').textContent=total;
+    $('greenPct').textContent=state.elapsed?Math.round(state.green/state.elapsed*100)+' %':'–';
+    $('next').textContent=mod+' / '+DISCOVERY;
+    $('nextItem').textContent=findName(total);
+    $('progress').value=mod;
+    $('level').textContent=Math.round(state.level)+' %';
+    $('meter').value=state.level;
+    $('meter').dataset.signal=state.signal;
+    levels.forEach(c=>$(c).classList.toggle('active',state.signal===c));
+    if ($('status').textContent!==label) $('status').textContent=label;
+    $('worldSignal').textContent={green:'Grün',yellow:'Gelb',red:'Rot',idle:'Ampel bereit'}[state.signal];
+    $('worldSignal').dataset.signal=state.signal;
+    $('play').textContent={ready:'Runde starten',running:'Pause',paused:'Fortsetzen',done:'Neue Runde'}[state.phase];
+    $('duration').disabled=state.phase==='running'||state.phase==='paused';
+    const penaltyLabel=!pen.enabled?'Konsequenzen ausgeschaltet.'
+      : !pen.points&&!pen.world?'Wähle eine Konsequenz aus.'
+      : state.cooldown>0?(state.penaltyText?state.penaltyText+' · ':'')+'Schutzpause '+Math.ceil(state.cooldown)+' s'
+      : state.red>0?'Rot seit '+state.red.toFixed(1)+' / '+pen.delay+' s'
+      : 'Auslösung nach '+pen.delay+' Sekunden durchgehend Rot.';
+    $('penStatus').textContent=penaltyLabel;
+    $('undoPenalty').disabled=!state.lastPenalty;
+  }
+  function setWorld(world) {
+    state.world=world;
+    $('worldTitle').textContent=worlds[world].title;
+    document.querySelectorAll('[data-world]').forEach(button=>{
+      button.setAttribute('aria-pressed',String(button.dataset.world===world));
+    });
+    save();
+    update();
+  }
+  function loadPenalty() {
+    const p={...defaults,...penaltyProfiles[state.age]};
+    $('penEnabled').checked=Boolean(p.enabled);
+    $('penPoints').checked=Boolean(p.points);
+    $('penWorld').checked=Boolean(p.world);
+    $('penDelay').value=[3,5,10].includes(p.delay)?p.delay:5;
+    $('penStrength').value=Object.hasOwn(strength,p.strength)?p.strength:'medium';
+    $('penCooldown').value=[10,20,30].includes(p.cooldown)?p.cooldown:20;
+    syncPenalty();
+  }
+  function syncPenalty() {
+    pen={
+      enabled:$('penEnabled').checked,points:$('penPoints').checked,world:$('penWorld').checked,
+      delay:+$('penDelay').value,strength:$('penStrength').value,cooldown:+$('penCooldown').value
+    };
+    state.red=0;
+    update();
+  }
+  function applyPenalty() {
+    const old=state.score, before=discoveries();
+    const pointLoss=pen.points?strength[pen.strength]:0;
+    const worldLoss=pen.world&&before>0?old-(before*DISCOVERY-1):0;
+    state.score=Math.max(0,old-Math.max(pointLoss,worldLoss));
+    state.red=0;
+    state.cooldown=pen.cooldown;
+    const loss=old-state.score, lost=before-discoveries();
+    state.penaltyText=loss?'−'+loss+' Punkte'+(lost?' · −'+lost+' Entdeckung':''):'Kein Fortschritt verloren';
+    if (loss) {
+      state.lastPenalty=loss;
+      save();
+    }
+    announce(state.penaltyText);
+  }
+  function advance(dt, sampled) {
+    const seconds=Math.min(dt,state.remaining);
+    state.remaining=state.remaining-seconds<1e-8?0:state.remaining-seconds;
+    state.elapsed+=seconds;
+    state.cooldown=Math.max(0,state.cooldown-seconds);
+    if (sampled&&pen.enabled&&(pen.points||pen.world)&&state.signal==='red') {
+      state.red+=seconds;
+      if (state.red+1e-8>=pen.delay&&state.cooldown<=1e-8) applyPenalty();
+    } else state.red=0;
+    if (sampled&&state.signal==='green') {
+      state.green+=seconds;
+      state.fraction+=seconds;
+      if (state.fraction+1e-8>=1) {
+        const before=discoveries();
+        state.score=Math.min(999999,state.score+1);
+        state.fraction=Math.max(0,state.fraction-1);
+        save();
+        if (discoveries()>before) {
+          announce('Neu entdeckt · '+worlds[state.world].finds[before%worlds[state.world].finds.length]);
+        }
+      }
+    }
+    if (!state.remaining) {
+      state.phase='done';
+      announce('Runde beendet. '+state.score+' Punkte.');
+      update();
+    }
+  }
+  function readLevel(dt) {
+    if (demo) {
+      state.level={green:12,yellow:50,red:100}[demo];
+      state.signal=demo;
+      return;
+    }
+    if (!hasInput()) {
+      state.level=0;
+      state.signal='idle';
+      return;
+    }
+    const {analyser,buffer}=audio;
+    analyser.getByteTimeDomainData(buffer);
+    let sum=0;
+    for (const sample of buffer) sum+=((sample-128)/128)**2;
+    const rms=Math.sqrt(sum/buffer.length);
+    if (calibration) { calibration.sum+=rms; calibration.count++; }
+    const relative=clamp(Math.max(0,rms-base)*100*(+$('sensitivity').value),0,100);
+    state.level+=(relative-state.level)*(1-Math.exp(-dt*14));
+    state.signal=state.level<+$('threshold').value?'green':state.level<+$('yellowLimit').value?'yellow':'red';
+  }
+  function tick(now) {
+    const dt=Math.max(0,(now-last)/1000);
+    last=now;
+    readLevel(dt);
+    // Don't credit or penalize time when the browser stopped sampling.
+    if (state.phase==='running') advance(dt,dt<=.5);
+    if (now-lastUpdate>=100) { lastUpdate=now; update(); }
+    render(now,state.world,state.age==='college',discoveries());
+    requestAnimationFrame(tick);
+  }
+  function cancelCalibration() {
+    if (!calibration) return;
+    clearTimeout(calibration.timer);
+    calibration=null;
+    $('calibrate').disabled=false;
+    $('calibration').textContent='Messung des Grundpegels abgebrochen.';
+  }
+  function stopMic(message='Mikrofon aus. Du kannst die Demo verwenden.') {
+    const active=audio;
+    audio=null;
+    if (active) {
+      active.stream.getTracks().forEach(track=>track.stop());
+      active.ctx.close().catch(()=>{});
+    }
+    cancelCalibration();
+    base=0;
+    state.red=0;
+    state.level=0;
+    state.signal='idle';
+    $('start').textContent='Mikrofon starten';
+    $('micState').textContent=message;
+  }
+  function setDemo(value) {
+    if (demo!==value) state.red=0;
+    demo=value;
+    $('demo').textContent=demo?'Demo beenden':'Demo';
+    $('demo').setAttribute('aria-pressed',String(Boolean(demo)));
+    $('demoControls').hidden=!demo;
+    document.querySelectorAll('[data-demo]').forEach(button=>{
+      button.setAttribute('aria-pressed',String(button.dataset.demo===demo));
+    });
+  }
+  async function startMic() {
+    if (pending) return;
+    if (audio) { stopMic(); return; }
+    pending=true;
+    $('start').disabled=$('demo').disabled=true;
+    $('micState').textContent='Warte auf die Mikrofonfreigabe …';
+    let stream,ctx;
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) throw new Error('Bitte die Seite über HTTPS oder localhost öffnen.');
+      const Audio=window.AudioContext||window.webkitAudioContext;
+      if (!Audio) throw new Error('Dieser Browser unterstützt die Pegelmessung nicht.');
+      ctx=new Audio();
+      const resumed=ctx.resume().catch(()=>{});
+      stream=await navigator.mediaDevices.getUserMedia({
+        audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}, video:false
+      });
+      await resumed;
+      if (ctx.state!=='running') {
+        throw new Error('Audio wurde vom Browser nicht gestartet. Bitte erneut versuchen.');
+      }
+      const track=stream.getAudioTracks()[0];
+      if (!track || track.readyState!=='live') throw new Error('Kein aktives Mikrofon gefunden.');
+      const source=ctx.createMediaStreamSource(stream), analyser=ctx.createAnalyser();
+      analyser.fftSize=2048;
+      source.connect(analyser);
+      audio={stream,ctx,track,source,analyser,buffer:new Uint8Array(analyser.fftSize)};
+      track.addEventListener('ended',()=>{ if (audio?.track===track) stopMic('Mikrofonverbindung beendet.'); });
+      track.addEventListener('mute',()=>{ if (audio?.track===track) $('micState').textContent='Mikrofon vorübergehend stumm.'; });
+      track.addEventListener('unmute',()=>{ if (audio?.track===track) $('micState').textContent='Mikrofon aktiv · Messung auf diesem Gerät.'; });
+      setDemo('');
+      $('start').textContent='Mikrofon stoppen';
+      $('micState').textContent='Mikrofon aktiv · Messung auf diesem Gerät.';
+    } catch (error) {
+      stream?.getTracks().forEach(track=>track.stop());
+      ctx?.close().catch(()=>{});
+      const reason=error.name==='NotAllowedError'?'Bitte erlaube den Zugriff in den Website-Einstellungen.'
+        :error.name==='NotFoundError'?'Kein Mikrofon gefunden.':error.message;
+      $('micState').textContent='Mikrofon nicht verfügbar. '+reason;
+    } finally {
+      pending=false;
+      $('start').disabled=$('demo').disabled=false;
+    }
+  }
+  function resetClock() {
+    state.remaining=+$('duration').value*60;
+    state.elapsed=state.green=state.fraction=state.red=state.cooldown=0;
+    state.lastPenalty=0;
+    state.penaltyText='';
+  }
+  function play() {
+    if (state.phase==='running') {
+      state.phase='paused';
+      state.red=0;
+      announce('Runde pausiert.');
+    } else {
+      if (!hasInput()) { announce('Bitte zuerst Mikrofon oder Demo starten.'); return; }
+      if (state.phase==='done') resetClock();
+      state.phase='running';
+      announce('Runde läuft.');
+    }
+    last=performance.now();
+    update();
+  }
+  function sliders() {
+    $('sensVal').textContent=$('sensitivity').value+'×';
+    $('thVal').textContent=$('threshold').value+' %';
+    $('yellowVal').textContent=$('yellowLimit').value+' %';
+  }
+  function applyWorkProfile() {
+    const [green,yellow]=profiles[state.work];
+    $('threshold').value=green;
+    $('yellowLimit').value=yellow;
+    sliders();
+  }
+  function setMode() {
+    document.body.classList.toggle('pixel',$('age').value==='college');
+    $('styleName').textContent=state.age==='college'?'Pixel-Art':'Cartoon';
+  }
+  $('age').value=state.age;
+  $('work').value=state.work;
+  $('age').onchange=()=>{
+    state.age=$('age').value;
+    loadPenalty(); setMode(); save();
+  };
+  $('work').onchange=()=>{ state.work=$('work').value; applyWorkProfile(); save(); };
+  $('sensitivity').oninput=sliders;
+  $('threshold').oninput=()=>{
+    if (+$('threshold').value>=+$('yellowLimit').value) $('yellowLimit').value=+$('threshold').value+1;
+    sliders();
+  };
+  $('yellowLimit').oninput=()=>{
+    if (+$('yellowLimit').value<=+$('threshold').value) $('threshold').value=+$('yellowLimit').value-1;
+    sliders();
+  };
+  penaltyIds.forEach(id=>$(id).onchange=()=>{
+    syncPenalty();
+    penaltyProfiles[state.age]=pen;
+    write('klassenampel-penalties-v03',penaltyProfiles);
+  });
+  $('undoPenalty').onclick=()=>{
+    if (!state.lastPenalty) return;
+    state.score=Math.min(999999,state.score+state.lastPenalty);
+    state.lastPenalty=state.red=0;
+    state.cooldown=pen.cooldown;
+    state.penaltyText='';
+    save();
+    announce('Letzte Konsequenz rückgängig gemacht.');
+    update();
+  };
+  $('calibrate').onclick=()=>{
+    if (!hasInput()||!audio) { $('calibration').textContent='Bitte zuerst das Mikrofon aktivieren.'; return; }
+    $('calibrate').disabled=true;
+    $('calibration').textContent='Fünf Sekunden lang den normalen Grundpegel im Raum messen …';
+    calibration={sum:0,count:0,timer:setTimeout(()=>{
+      if (calibration.count) {
+        base=calibration.sum/calibration.count*.65;
+        $('calibration').textContent='Grundpegel ermittelt. Du kannst die Grenzen bei Bedarf nachjustieren.';
+      } else $('calibration').textContent='Kein Grundpegel verfügbar. Bitte erneut messen.';
+      calibration=null;
+      $('calibrate').disabled=false;
+    },5000)};
+  };
+  $('start').onclick=startMic;
+  $('demo').onclick=()=>{
+    if (demo) {
+      setDemo('');
+      $('micState').textContent='Demo aus. Starte das Mikrofon für eine echte Messung.';
+    } else {
+      if (audio) stopMic();
+      setDemo('green');
+      $('micState').textContent='Demo aktiv. Wähle eine Ampelfarbe zum Testen.';
+    }
+    readLevel(0);
+    update();
+  };
+  document.querySelectorAll('[data-demo]').forEach(button=>button.onclick=()=>{
+    if (!demo) return;
+    setDemo(button.dataset.demo);
+    readLevel(0);
+    update();
+  });
+  document.querySelectorAll('[data-world]').forEach(button=>button.onclick=()=>setWorld(button.dataset.world));
+  $('play').onclick=play;
+  $('duration').onchange=()=>{
+    resetClock();
+    state.phase='ready';
+    announce('');
+    update();
+  };
+  $('reset').onclick=()=>{
+    if (!confirm('Runde, Punkte und Entdeckungen zurücksetzen?')) return;
+    resetClock();
+    state.score=0;
+    state.phase='ready';
+    save(); announce('Runde zurückgesetzt.'); update();
+  };
+  $('fullscreen').hidden=!document.fullscreenEnabled;
+  $('fullscreen').onclick=async()=>{
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch { announce('Vollbild ist momentan nicht verfügbar.'); }
+  };
+  $('projector').onclick=()=>{
+    const active=document.body.classList.toggle('projector');
+    $('projector').setAttribute('aria-pressed',String(active));
+    $('projector').textContent=active?'Bedienansicht':'Präsentation';
+  };
+  window.addEventListener('pagehide',()=>{
+    if (audio) stopMic();
+    if (state.phase==='running') play();
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if (document.hidden&&state.phase==='running') play();
+  });
+  setMode();
+  applyWorkProfile();
+  setWorld(state.world);
+  loadPenalty();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
