@@ -1,0 +1,9 @@
+# Generated browser test artifacts
+/tests/edge-*/
+/tests/*.png
+/tests/*-test.html
+# Local editor and system files
+/.vscode/
+/.idea/
+.DS_Store
+Thumbs.db

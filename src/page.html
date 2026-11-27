@@ -1,0 +1,185 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.5.0</title><style>/* STYLE */</style></head><body><main>
+<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.5.0</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
+<section id="workspaceMenu" class="workspace-menu" hidden aria-label="Module und Einstellungen"><div class="menu-heading"><strong>Dein Arbeitsplatz</strong><button id="menuClose" aria-label="Menü schließen">×</button></div><div class="menu-grid"><section><h2>Anzeigen</h2><div id="moduleChoices"></div><div class="actions"><button id="autoArrange">Automatisch anordnen</button><button id="layoutUndo" disabled>Anordnung zurück</button></div><label for="layoutPreset">Anordnung</label><select id="layoutPreset"><option value="world">Spielwelt im Mittelpunkt</option><option value="task">Aufgabe & Uhr</option><option value="board">Tafel im Mittelpunkt</option></select><details class="panel" data-setting="modules" id="details-modules">
+        <summary>Anzeige im Spielmodul</summary>
+        <div class="row" hidden><label for="showTask">Aufgabenbox anzeigen</label><input id="showTask" type="checkbox" checked></div>
+        <div class="row" hidden><label for="showCountdown">Countdown anzeigen</label><input id="showCountdown" type="checkbox" checked></div>
+        <div class="row"><label for="showHud">Spielstand anzeigen</label><input id="showHud" type="checkbox" checked></div>
+        <div class="row"><label for="showDiscovery">Entdeckungen anzeigen</label><input id="showDiscovery" type="checkbox" checked></div>
+        <button id="resetLayout">Positionen zurücksetzen</button>
+        <p class="hint">Boxen am Griff in die Spielwelt oder nach außen ziehen.</p>
+      </details></section><section><h2>Unterricht</h2><details class="panel" data-setting="teaching" id="details-teaching">
+      <summary id="teachingTitle">Unterricht</summary>
+      <div class="row"><label for="age">Unterrichtsmodus</label>
+        <select id="age"><option value="primary">Grundschule</option><option value="college">Berufskolleg</option></select>
+      </div>
+      <div class="row"><label for="work">Arbeitsform</label>
+        <select id="work"><option value="silent">Stillarbeit</option><option value="pair">Partnerarbeit</option><option value="group">Gruppenarbeit</option></select>
+      </div>
+      <p class="hint">Die Arbeitsform stellt die Pegelgrenzen ein. Der Punktestand gilt für alle fünf Welten und beide Grafikstile.</p>
+    </details><details class="panel" data-setting="penalties" id="details-penalties">
+      <summary>Konsequenzen</summary>
+      <div class="row"><label for="penEnabled">Modul aktiv</label><input type="checkbox" id="penEnabled" checked></div>
+      <div class="row"><label for="penPoints">Punkte abziehen</label><input type="checkbox" id="penPoints" checked></div>
+      <div class="row"><label for="penWorld">Spielwelt-Rückschritt</label><input type="checkbox" id="penWorld" checked></div>
+      <div class="row"><label for="penDelay">Durchgehend Rot</label><select id="penDelay"><option value="3">3 Sekunden</option><option value="5" selected>5 Sekunden</option><option value="10">10 Sekunden</option></select></div>
+      <div class="row"><label for="penStrength">Stärke</label><select id="penStrength"><option value="mild">Mild · 5 Punkte</option><option value="medium" selected>Mittel · 15 Punkte</option><option value="strong">Streng · 30 Punkte</option></select></div>
+      <div class="row"><label for="penCooldown">Schutzpause</label><select id="penCooldown"><option value="10">10 Sekunden</option><option value="20" selected>20 Sekunden</option><option value="30">30 Sekunden</option></select></div>
+      <p id="penStatus" class="hint"></p>
+      <button id="undoPenalty" disabled>Letzte Konsequenz rückgängig</button>
+      <p class="hint">Die Einstellungen werden je Unterrichtsmodus gespeichert. Für den Weltrückschritt kann der Abzug höher ausfallen.</p>
+    </details><details class="panel" data-setting="calibration" id="details-calibration">
+      <summary>Mikrofon abgleichen</summary>
+      <label class="slider" for="sensitivity">Verstärkung <span id="sensVal">5×</span></label>
+      <input id="sensitivity" type="range" min="1" max="12" step=".5" value="5">
+      <label class="slider" for="threshold">Grün bis <span id="thVal">35 %</span></label>
+      <input id="threshold" type="range" min="10" max="75" value="35">
+      <label class="slider" for="yellowLimit">Gelb bis <span id="yellowVal">65 %</span></label>
+      <input id="yellowLimit" type="range" min="20" max="95" value="65">
+      <button id="calibrate">5 Sek. Grundpegel messen</button>
+      <p id="calibration" class="hint" aria-live="polite">Passe die Pegelgrenzen bei Bedarf an den Raum an.</p>
+    </details></section><section><h2>Darstellung</h2><details class="panel world-picker" data-setting="worldPicker" id="details-worldPicker"><summary>Spielwelt wählen</summary>  <nav aria-label="Spielwelt wählen" class="world-choices">
+    <button data-world="neutral">Neutral</button>
+    <button data-world="lava">Lavalampe</button>
+    <button data-world="aquarium"><span aria-hidden="true">🐠</span> Aquarium</button>
+    <button data-world="city"><span aria-hidden="true">🏙️</span> Städtebau</button>
+    <button data-world="space"><span aria-hidden="true">🚀</span> Weltraum</button>
+    <button data-world="fantasy"><span aria-hidden="true">🏰</span> Fantasy</button>
+    <button data-world="nature"><span aria-hidden="true">🌿</span> Natur</button>
+  </nav><div id="neutralOptions" hidden aria-label="Optionen für den neutralen Modus">
+      <div class="row"><label for="neutralAnimation">Langsame Hintergrundbewegung</label><input id="neutralAnimation" type="checkbox"></div>
+      <button id="startScreensaver" type="button">Bildschirmschoner starten</button>
+      <p class="hint">Ruhige Formen im neutralen Modus. Mit ↩ oder Escape zurück zur Bedienansicht.</p>
+    </div></details><details class="panel" data-setting="fonts" id="details-fonts">
+      <summary>Schrift</summary>
+      <div class="row"><label for="fontFamily">Schriftart</label>
+        <select id="fontFamily">
+          <option value="system-ui">Systemschrift</option>
+          <option value="Arial">Arial</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Consolas">Consolas</option>
+        </select>
+      </div>
+      <label class="slider" for="uiFontSize">Oberfläche <output id="uiFontSizeValue">16 px</output></label>
+      <input id="uiFontSize" type="range" min="12" max="24" step="1" value="16">
+      <label class="slider" for="taskFontSize">Aufgabentext <output id="taskFontSizeValue">20 px</output></label>
+      <input id="taskFontSize" type="range" min="12" max="48" step="1" value="20">
+      <label class="slider" for="clockFontSize">Countdown-Uhr <output id="clockFontSizeValue">48 px</output></label>
+      <input id="clockFontSize" type="range" min="20" max="96" step="2" value="48">
+      <button id="resetFonts" type="button">Schrift zurücksetzen</button>
+    </details><details class="panel unlock-settings" data-setting="unlocks" id="details-unlocks">
+        <summary>Freischaltungen ansehen</summary>
+        <label class="slider" for="unlockPreview">Ausbaustufe</label>
+        <select id="unlockPreview"><option value="live">Aktueller Spielstand</option></select>
+        <p id="previewStatus" class="hint" aria-live="polite">Die Vorschau verändert den Punktestand nicht.</p>
+      </details><details id="appearanceSettings"><summary>Modul gestalten</summary><label for="appearanceTarget">Modul</label><select id="appearanceTarget"></select><label for="moduleColor">Akzentfarbe</label><input id="moduleColor" type="color" value="#7196ad"><label for="moduleOpacity">Hintergrundtransparenz</label><input id="moduleOpacity" type="range" min="0" max="100" value="0"><label><input id="moduleLocked" type="checkbox"> Position fixieren</label></details></section><section><h2>Speichern & Teilen</h2><details class="panel view-settings" data-setting="sharing" id="details-sharing">
+        <summary>Ansicht speichern und teilen</summary>
+        <div class="actions">
+          <button id="saveView">Ansicht speichern</button>
+          <button id="exportView">Ansicht als HTML exportieren</button>
+          <button id="shareView">Online-Link erstellen</button>
+        </div>
+        <p id="viewStatus" class="hint" aria-live="polite"></p>
+        <input id="shareLink" type="url" readonly hidden aria-label="Link zur eingerichteten Ansicht">
+        <p class="hint">HTML auf einem anderen Gerät öffnen oder als index.html auf GitHub Pages veröffentlichen. Online-Links enthalten die Einrichtung beim Erstellen.</p>
+      </details></section></div><p id="layoutNotice" class="hint" role="status"></p></section>
+<div class="layout"><div class="stage"><section class="game-module panel" data-board="mainScreen" aria-label="Spielwelt mit Runde und Fortschritt"><section class="world" aria-labelledby="worldTitle">
+        <canvas id="scene" aria-hidden="true"></canvas>
+
+
+
+        <div class="world-heading">
+          <div>
+            <div id="styleName" class="style-name">Cartoon</div>
+            <h2 id="worldTitle" hidden>Aquarium</h2>
+            <p id="worldDesc">Ein Riff voller Leben</p>
+          </div>
+          <div id="worldSignal" class="world-signal" data-signal="idle">Ampel bereit</div>
+        </div>
+        <div class="hud">
+          <div><span>Restzeit</span><strong id="timeLeft">15:00</strong></div>
+          <div><span>Spielstand</span><strong id="pointsBadge">0 Punkte</strong></div>
+          <div><span>Spielwelt</span><strong id="worldProgress">0 Entdeckungen</strong></div>
+        </div>
+      </section><div class="game-footer"><section class="discovery" aria-labelledby="discoveryTitle">
+        <div class="row">
+          <div><span id="discoveryTitle" class="hint">Nächste Entdeckung</span><strong id="nextItem">Clownfisch</strong></div>
+          <strong id="next">0 / 30</strong>
+        </div>
+        <progress id="progress" value="0" max="30" aria-labelledby="discoveryTitle"></progress>
+        <p id="announcement" aria-live="polite"></p>
+        <div class="actions world-actions"><button class="primary" id="play">Runde starten</button><button id="worldAction" type="button">Fischschwarm rufen</button>
+        <span id="actionStatus" class="hint" aria-live="polite"></span></div>
+      </section><details class="panel" id="roundSettings">
+<summary id="roundTitle">Spielrunde</summary>
+
+        <div class="row"><label for="duration">Dauer</label>
+          <select id="duration">
+            <option value="5">5 Minuten</option><option value="10">10 Minuten</option>
+            <option value="15" selected>15 Minuten</option><option value="20">20 Minuten</option>
+            <option value="30">30 Minuten</option><option value="45">45 Minuten</option><option value="60">60 Minuten</option>
+          </select>
+        </div>
+        <div class="actions input-actions">
+          <button id="reset">Zurücksetzen</button>
+        </div>
+        <div class="stats"><div><strong id="score">0</strong><span>Punkte</span></div>
+          <div><strong id="items">0</strong><span>Entdeckungen</span></div>
+          <div><strong id="greenPct">–</strong><span>Grünzeit</span></div>
+        </div>
+        <p class="hint">Grün bringt 1 Punkt pro Sekunde. Bei Gelb und Rot pausiert das Sammeln. Alle 30 Punkte wächst die Welt.</p>
+      </details></div></section><section id="whiteboardModule" class="panel whiteboard-module" data-board="whiteboard" aria-labelledby="whiteboardTitle">
+        <h2 id="whiteboardTitle">Tafel</h2>
+        <div class="actions whiteboard-tools">
+          <label for="whiteboardTool">Werkzeug</label>
+          <select id="whiteboardTool"><option value="pen">Stift</option><option value="eraser">Radierer</option><option value="select">Auswählen / Verschieben</option><option value="text">Textfeld platzieren</option></select>
+          <input id="whiteboardColor" type="color" value="#183846" aria-label="Zeichen- und Textfarbe">
+          <input id="whiteboardWidth" type="range" min="2" max="24" value="5" aria-label="Strichstärke">
+          <button id="whiteboardAddPhoto" type="button">Foto hinzufügen</button><input id="whiteboardPhoto" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          <button id="whiteboardUndo" type="button">Rückgängig</button>
+          <button id="whiteboardDelete" type="button" disabled>Auswahl löschen</button>
+          <button id="whiteboardClear" type="button">Leeren</button>
+        </div>
+        <div class="actions whiteboard-tools">
+          <label for="whiteboardFontSize">Textgröße</label>
+          <input id="whiteboardFontSize" type="number" min="12" max="96" value="32" aria-label="Tafelschriftgröße">
+          <button id="whiteboardAddText" type="button">Textfeld hinzufügen</button>
+          <label for="whiteboardOpacity">Transparenz</label><input id="whiteboardOpacity" type="range" min="0" max="100" value="0" aria-label="Transparenz des ausgewählten Tafelobjekts" disabled>
+          <span id="whiteboardPhotoControls" hidden><label for="whiteboardPhotoSize">Fotogröße</label><input id="whiteboardPhotoSize" type="range" min="5" max="100" value="40" aria-label="Breite des ausgewählten Fotos in Prozent der Tafel"></span>
+        </div>
+        <div id="whiteboardSurface"><canvas id="whiteboardCanvas" width="2000" height="1200" tabindex="0" aria-label="Zeichenfläche für Stift, Text und Fotos"></canvas><div id="whiteboardTextLayer"></div></div>
+        <p id="whiteboardStatus" class="hint" role="status">Mit Stift zeichnen oder Text und Fotos hinzufügen. Objekte mit „Verschieben“ anordnen.</p>
+      </section></div><aside class="side" aria-label="Arbeitsmodule"><div id="moduleDock" class="module-dock"><section id="taskModule" class="panel task-panel floating-module" aria-labelledby="taskLabel" data-board="task">
+        <button class="drag-handle" data-drag="taskModule" aria-label="Aufgabenbox verschieben, auch mit Pfeiltasten">⠿ Aufgabe verschieben</button><label id="taskLabel" for="taskText">Eure Aufgabe</label>
+        <textarea id="taskText" rows="3" maxlength="2000" placeholder="Was soll die Klasse bearbeiten?"></textarea>
+      </section><section id="countdownModule" class="panel countdown-panel floating-module" aria-labelledby="countdownLabel" data-board="countdown">
+        <button class="drag-handle" data-drag="countdownModule" aria-label="Countdown verschieben, auch mit Pfeiltasten">⠿ Uhr verschieben</button><h2 id="countdownLabel">Aufgaben-Countdown</h2>
+        <output id="countdownDisplay" role="timer">05:00</output>
+        <details class="module-settings" id="countdownSettings"><summary>Uhr einstellen</summary><div class="actions">
+          <label for="countdownMinutes">Minuten</label>
+          <input id="countdownMinutes" type="number" min="1" max="180" step="1" value="5" required>
+          <button id="countdownStart">Countdown starten</button>
+          <button id="countdownReset">Neu setzen</button>
+        </div>
+        <div class="row"><label for="countdownSound">Signalton bei Ablauf</label><input id="countdownSound" type="checkbox" checked></div>
+        </details><p id="countdownStatus" class="hint" aria-live="polite">Bereit</p>
+      </section></div><details class="panel" open data-board="microphone" id="details-microphone">
+<summary id="ampelTitle">Lautstärkeampel</summary>
+
+        <div class="lights" aria-hidden="true">
+          <i class="light" id="red"></i><i class="light" id="yellow"></i><i class="light" id="green"></i>
+        </div>
+        <p id="status" aria-live="polite">Bereit</p>
+        <div class="row reading"><label for="meter">Relativer Pegel</label><strong id="level">0 %</strong></div>
+        <progress id="meter" value="0" max="100"></progress>
+        <div class="actions input-actions">
+          <button id="start">Mikrofon starten</button>
+          <button id="demo" aria-pressed="false">Demo</button>
+        </div>
+        <p id="micState" class="hint" aria-live="polite">Starte das Mikrofon oder probiere die Demo.</p>
+        <div id="demoControls" class="actions demo-controls" aria-label="Demofarbe wählen" hidden>
+          <button data-demo="green">Grün</button><button data-demo="yellow">Gelb</button><button data-demo="red">Rot</button>
+        </div>
+      </details></aside></div>
+<footer>Die Pegelmessung erfolgt im Browser ohne Tonaufnahmen. Der relative Pegel ist kein Dezibelwert. Spielstand und Profile bleiben im verwendeten Browser.</footer></main><script>/* SCRIPT */</script></body></html>
