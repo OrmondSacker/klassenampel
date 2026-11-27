@@ -105,6 +105,47 @@ async function verify() {
     assert.equal(await value('penDelay'),'5');
     assert.equal(await value('penStrength'),'medium');
     assert.equal(await value('penCooldown'),'20');
+    if(process.env.TIME_TASK_ONLY) {
+      await evaluate("window.testClock=Date.now();Date.now=()=>testClock");
+      assert.equal(await label('workModeLabel'),'Partnerarbeit');
+      await change('work','value','group');assert.equal(await label('workModeLabel'),'Gruppenarbeit');
+      await change('showWorkMode','checked',false);assert(await evaluate("document.getElementById('workModeBadge').hidden"));
+      await change('showWorkMode','checked',true);await change('showFollowUp','checked',true);
+      await evaluate("document.getElementById('taskFollowUp').open=true;document.getElementById('followUpTask').value='Kontrolliere deine Ergebnisse.';document.getElementById('followUpTask').dispatchEvent(new Event('input'))");
+      await click('#countdownStart');await evaluate('testClock+=30000;classroomView.snapshot()');
+      assert.equal(await label('countdownDisplay'),'04:30');
+      await click('#countdownPlus');assert.equal(await label('countdownDisplay'),'05:30');assert.equal(await label('countdownStart'),'Countdown pausieren');
+      assert.equal(await evaluate("document.getElementById('countdownProgress').max"),360);assert.equal(await evaluate("document.getElementById('countdownProgress').value"),330);
+      await click('[data-countdown-preset="2"]');assert.equal(await label('countdownDisplay'),'05:30');
+      await click('#countdownMinus');assert.equal(await label('countdownDisplay'),'04:30');
+      await click('#countdownStart');await evaluate('testClock+=10000;classroomView.snapshot()');assert.equal(await label('countdownDisplay'),'04:30');
+      for(const minutes of [2,5,10,15]){await click('[data-countdown-preset="'+minutes+'"]');assert.equal(await label('countdownDisplay'),String(minutes).padStart(2,'0')+':00');assert.equal(await evaluate("document.getElementById('countdownProgress').value/document.getElementById('countdownProgress').max"),1);}
+      await evaluate("window.alarmStarts=0;const oldOscillator=AudioContext.prototype.createOscillator;AudioContext.prototype.createOscillator=function(){const node=oldOscillator.call(this),start=node.start.bind(node);node.start=(...args)=>{alarmStarts++;return start(...args)};return node}");
+      await change('countdownMinutes','value','1');await click('#countdownStart');await sleep(100);await evaluate('testClock+=30000;classroomView.snapshot()');await click('#countdownMinus');await sleep(120);
+      assert.equal(await label('countdownDisplay'),'00:00');assert.equal(await evaluate('alarmStarts'),3);await evaluate('classroomView.snapshot()');assert.equal(await evaluate('alarmStarts'),3);
+      await click('#countdownPlus');assert.equal(await label('countdownDisplay'),'01:00');assert.equal(await label('countdownStart'),'Countdown starten');
+      assert.equal(await evaluate("document.getElementById('countdownProgress').value/document.getElementById('countdownProgress').max"),1);
+      await change('countdownMinutes','value','180');await click('#countdownPlus');assert.equal(await label('countdownDisplay'),'180:00');
+      await click('[data-countdown-preset="5"]');await change('showCountdownProgress','checked',false);assert(await evaluate("document.getElementById('countdownProgress').hidden"));
+      await evaluate("document.getElementById('viewName').value='Arbeitsphase'");await click('#saveView');const id=await value('savedViews');const saved=await evaluate('classroomView.snapshot()');
+      await change('showFollowUp','checked',false);await change('work','value','silent');await change('showCountdownProgress','checked',true);await click('[data-countdown-preset="2"]');
+      await change('savedViews','value',id);await click('#loadView');
+      assert.equal(await value('followUpTask'),'Kontrolliere deine Ergebnisse.');assert.equal(await label('workModeLabel'),'Gruppenarbeit');assert.equal(await label('countdownDisplay'),'05:00');assert(await evaluate("document.getElementById('countdownProgress').hidden"));assert.equal(await evaluate("document.getElementById('taskFollowUp').hidden"),false);
+      await change('showCountdownProgress','checked',true);await click('#shareView');const shared=await value('shareLink');
+      fs.writeFileSync(path.join(__dirname,'time-task-test.html'),await evaluate('classroomView.exportHtml()'));
+      await send('Page.navigate',{url:pathToFileURL(path.join(__dirname,'time-task-test.html')).href});await sleep(500);assert.equal(await value('followUpTask'),'Kontrolliere deine Ergebnisse.');assert.equal(await label('workModeLabel'),'Gruppenarbeit');assert.equal(await evaluate('classroomView.snapshot().countdownTotal'),300);
+      await send('Page.navigate',{url:shared});await sleep(500);assert.equal(await value('followUpTask'),'Kontrolliere deine Ergebnisse.');
+      await click('#autoArrange');await step(.1);await shot('v052-desktop');
+      await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});await sleep(250);
+      const mobileBoxes=await evaluate("[...document.querySelectorAll('#moduleLayer > [data-board]')].filter(e=>!e.hidden).map(e=>{const r=e.getBoundingClientRect();return {id:e.dataset.board,x:r.x,y:r.y,right:r.right,bottom:r.bottom}})");
+      for(let i=0;i<mobileBoxes.length;i++)for(let j=i+1;j<mobileBoxes.length;j++){const a=mobileBoxes[i],b=mobileBoxes[j];assert(a.right<=b.x+1||b.right<=a.x+1||a.bottom<=b.y+1||b.bottom<=a.y+1,'Mobile automatic layout overlap');}
+      await evaluate("document.getElementById('taskModule').scrollIntoView({block:'start'})");await shot('v052-mobile');
+      assert((await evaluate('document.documentElement.scrollWidth'))<=390);
+      const legacy=structuredClone(saved);delete legacy.followUpTask;delete legacy.countdownTotal;for(const key of ['showWorkMode','showFollowUp','showCountdownProgress'])delete legacy.controls[key];
+      await send('Page.navigate',{url:'about:blank'});await send('Page.navigate',{url:url+'#ansicht='+encodeURIComponent(JSON.stringify(legacy))});await sleep(500);
+      assert.equal(await value('followUpTask'),'');assert(await evaluate("document.getElementById('taskFollowUp').hidden"));assert.equal(await evaluate("document.getElementById('workModeBadge').hidden"),false);assert.equal(await evaluate("document.getElementById('countdownProgress').hidden"),false);
+      assert.deepEqual(errors,[]);console.log('0.5.2: Zeitkorrekturen ohne Pause/Reset, Vorgaben, Zeitbalken, Ablaufalarm, Arbeitsform, Zusatzauftrag, Bibliothek/HTML/Link, alte Ansichten und Mobilansicht geprüft.');return;
+    }
     if(process.env.LIBRARY_ONLY) {
       await click('[data-module-choice=whiteboard]');await click('#whiteboardAddText');
       await evaluate("document.querySelector('.whiteboard-text-field').value='Tafel A';document.querySelector('.whiteboard-text-field').dispatchEvent(new Event('input'));document.getElementById('taskText').value='Aufgabe A';document.getElementById('viewName').value='Mathematik'");
@@ -139,7 +180,7 @@ async function verify() {
       assert.deepEqual(errors,[]);console.log('Bibliothek: mehrere Ansichten, direktes Öffnen mit Tafel/Layout/Timer, Rückgängig, Umbenennen/Ersetzen/Löschen, Speicherfehler, Neustart und Altdatenübernahme geprüft.');return;
     }
     if(process.env.VERSION5_ONLY) {
-      assert.equal(await evaluate("document.title"),'KlassenAmpel 0.5.1');
+      assert.equal(await evaluate("document.title"),'KlassenAmpel 0.5.2');
       assert.equal(await evaluate("document.querySelectorAll('[data-board]').length"),5);
       assert(await evaluate("document.querySelector('[data-board=mainScreen]').contains(document.getElementById('roundSettings'))"));
       assert(await evaluate("document.querySelector('[data-board=mainScreen]').contains(document.querySelector('.discovery'))"));

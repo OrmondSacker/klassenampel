@@ -1,11 +1,13 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.5.1</title><style>/* STYLE */</style></head><body><main>
-<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.5.1</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.5.2</title><style>/* STYLE */</style></head><body><main>
+<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.5.2</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
 <section id="workspaceMenu" class="workspace-menu" hidden aria-label="Module und Einstellungen"><div class="menu-heading"><strong>Dein Arbeitsplatz</strong><button id="menuClose" aria-label="Menü schließen">×</button></div><div class="menu-grid"><section><h2>Anzeigen</h2><div id="moduleChoices"></div><div class="actions"><button id="autoArrange">Automatisch anordnen</button><button id="layoutUndo" disabled>Anordnung zurück</button></div><label for="layoutPreset">Anordnung</label><select id="layoutPreset"><option value="world">Spielwelt im Mittelpunkt</option><option value="task">Aufgabe & Uhr</option><option value="board">Tafel im Mittelpunkt</option></select><details class="panel" data-setting="modules" id="details-modules">
-        <summary>Anzeige im Spielmodul</summary>
+        <summary>Anzeigen im Detail</summary>
         <div class="row" hidden><label for="showTask">Aufgabenbox anzeigen</label><input id="showTask" type="checkbox" checked></div>
         <div class="row" hidden><label for="showCountdown">Countdown anzeigen</label><input id="showCountdown" type="checkbox" checked></div>
         <div class="row"><label for="showHud">Spielstand anzeigen</label><input id="showHud" type="checkbox" checked></div>
         <div class="row"><label for="showDiscovery">Entdeckungen anzeigen</label><input id="showDiscovery" type="checkbox" checked></div>
+        <div class="row"><label for="showWorkMode">Arbeitsform bei der Aufgabe</label><input id="showWorkMode" type="checkbox" checked></div>
+        <div class="row"><label for="showFollowUp">„Fertig? Dann …“ bei der Aufgabe</label><input id="showFollowUp" type="checkbox"></div>
         <button id="resetLayout">Positionen zurücksetzen</button>
         <p class="hint">Boxen am Griff in die Spielwelt oder nach außen ziehen.</p>
       </details></section><section><h2>Unterricht</h2><details class="panel" data-setting="teaching" id="details-teaching">
@@ -157,16 +159,23 @@
         <p id="whiteboardStatus" class="hint" role="status">Mit Stift zeichnen oder Text und Fotos hinzufügen. Objekte mit „Verschieben“ anordnen.</p>
       </section></div><aside class="side" aria-label="Arbeitsmodule"><div id="moduleDock" class="module-dock"><section id="taskModule" class="panel task-panel floating-module" aria-labelledby="taskLabel" data-board="task">
         <button class="drag-handle" data-drag="taskModule" aria-label="Aufgabenbox verschieben, auch mit Pfeiltasten">⠿ Aufgabe verschieben</button><label id="taskLabel" for="taskText">Eure Aufgabe</label>
+        <p id="workModeBadge" class="work-mode-badge"><span id="workModeIcon" aria-hidden="true">✎</span><span id="workModeLabel">Stillarbeit</span></p>
         <textarea id="taskText" rows="3" maxlength="2000" placeholder="Was soll die Klasse bearbeiten?"></textarea>
+        <details id="taskFollowUp" hidden><summary>Fertig? Dann …</summary><textarea id="followUpTask" rows="2" maxlength="2000" aria-label="Zusatzauftrag nach dem Fertigstellen" placeholder="Zum Beispiel: Kontrolliere deine Ergebnisse."></textarea></details>
       </section><section id="countdownModule" class="panel countdown-panel floating-module" aria-labelledby="countdownLabel" data-board="countdown">
         <button class="drag-handle" data-drag="countdownModule" aria-label="Countdown verschieben, auch mit Pfeiltasten">⠿ Uhr verschieben</button><h2 id="countdownLabel">Aufgaben-Countdown</h2>
         <output id="countdownDisplay" role="timer">05:00</output>
+        <progress id="countdownProgress" value="300" max="300" aria-label="Verbleibende Aufgabenzeit"></progress>
+        <div class="countdown-quick"><button id="countdownMinus" type="button" aria-label="Aufgabenzeit um eine Minute verkürzen">−1 min</button><button id="countdownPlus" type="button" aria-label="Aufgabenzeit um eine Minute verlängern">+1 min</button></div>
+        <button id="countdownStart">Countdown starten</button>
         <details class="module-settings" id="countdownSettings"><summary>Uhr einstellen</summary><div class="actions">
+          <div class="countdown-presets" role="group" aria-label="Aufgabenzeit neu setzen"><button type="button" data-countdown-preset="2">2 min</button><button type="button" data-countdown-preset="5">5 min</button><button type="button" data-countdown-preset="10">10 min</button><button type="button" data-countdown-preset="15">15 min</button></div>
           <label for="countdownMinutes">Minuten</label>
           <input id="countdownMinutes" type="number" min="1" max="180" step="1" value="5" required>
-          <button id="countdownStart">Countdown starten</button>
+
           <button id="countdownReset">Neu setzen</button>
         </div>
+        <div class="row"><label for="showCountdownProgress">Restzeit als Balken anzeigen</label><input id="showCountdownProgress" type="checkbox" checked></div>
         <div class="row"><label for="countdownSound">Signalton bei Ablauf</label><input id="countdownSound" type="checkbox" checked></div>
         </details><p id="countdownStatus" class="hint" aria-live="polite">Bereit</p>
       </section></div><details class="panel" open data-board="microphone" id="details-microphone">

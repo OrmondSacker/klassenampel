@@ -1,6 +1,6 @@
 # KlassenAmpel
 
-Version 0.5.1, Stand 27. November 2026. Die bisherige Version 0.4 wurde in fünf zusammengehörige Arbeitsmodule und ein zentrales Menü überführt.
+Version 0.5.2, Stand 27. November 2026. Die bisherige Version 0.4 wurde in fünf zusammengehörige Arbeitsmodule und ein zentrales Menü überführt.
 
 Die KlassenAmpel ist eine deutschsprachige Web-App für den Unterricht. Sie verbindet eine Mikrofon-Lautstärkeampel mit einer Spielrunde, gemeinsamem Fortschritt, Aufgabenfeld und unabhängigem Aufgaben-Countdown. Sie richtet sich an Grundschule und Berufskolleg und soll auf Unterrichtsrechnern, interaktiven Tafeln sowie mobilen Geräten nutzbar sein.
 
@@ -10,7 +10,7 @@ Die KlassenAmpel ist eine deutschsprachige Web-App für den Unterricht. Sie verb
 - [PROJECT.md](PROJECT.md) beschreibt Entscheidungen, aktuelle Implementierung, Regeln, Datenhaltung und bekannte Grenzen.
 - [ROADMAP.md](ROADMAP.md) unterscheidet verbindliche offene Anforderungen, technische Prüfaufgaben und unverbindliche Ideen.
 
-Die Dokumentation basiert auf dem bisherigen Gespräch und den tatsächlich vorhandenen lokalen Dateien. Am 26.11.2026 wurde GitHub-main lesend geprüft. Dort liegt weiterhin ein älterer Stand. Die aktuelle Bestandsaufnahme steht am Anfang von PROJECT.md, die daraus abgeleitete Arbeitsreihenfolge am Anfang von ROADMAP.md.
+Die Dokumentation basiert auf dem bisherigen Gespräch und den tatsächlich vorhandenen lokalen Dateien. Seit dem 27.11.2026 werden die freigegebenen Versionen auf GitHub Pages veröffentlicht. Die aktuelle Bestandsaufnahme steht am Anfang von PROJECT.md, die daraus abgeleitete Arbeitsreihenfolge am Anfang von ROADMAP.md.
 
 ## Sofort ausprobieren
 
@@ -19,8 +19,10 @@ Die Dokumentation basiert auf dem bisherigen Gespräch und den tatsächlich vorh
 1. Öffne „Module & Einstellungen“. Wähle unter Darstellung eine Spielwelt.
 2. Starte für einen ersten Test die Demo. Grün, Gelb und Rot lassen sich dort manuell setzen.
 3. Starte zusätzlich eine Spielrunde, wenn Punkte und Rundenzeit laufen sollen.
-4. Trage eine Aufgabe ein und stelle den separaten Aufgaben-Countdown ein.
+4. Trage eine Aufgabe ein und stelle den separaten Aufgaben-Countdown ein. Start/Pause und ±1 Minute sind direkt erreichbar. Unter „Uhr einstellen“ gibt es Vorgaben für 2, 5, 10 und 15 Minuten sowie einen abschaltbaren Restzeitbalken. Die Vorgaben sind während des Laufens gesperrt; ±1 Minute erhält den laufenden oder pausierten Zustand.
 5. Wähle im Menü die sichtbaren Arbeitsmodule. Aufgabe und Uhr stehen zunächst neben der Spielwelt; am Griff lassen sie sich auch in die Szene ziehen.
+
+Die Arbeitsform erscheint bei der Aufgabe als Symbol mit Text. Unter „Module & Einstellungen → Anzeigen → Anzeigen im Detail“ kannst du sie ausblenden und den Zusatzauftrag „Fertig? Dann …“ einschalten. Der Zusatzauftrag ist innerhalb der Aufgabenbox aufklappbar und wird mitgespeichert.
 
 Die fünf Arbeitsmodule sind Spielwelt, Lautstärkeampel, Aufgabe, Countdown und Tafel. Punkte, Rundenrestzeit, Fortschritt, Weltaktion und Rundensteuerung bleiben fest im Spielmodul. Einstellungen besitzen keine eigenen Verschiebegriffe. Die Tafel lässt sich im Menü zuschalten.
 
@@ -117,7 +119,7 @@ node tests/browser-check.cjs
 Remove-Item Env:ALARM_ONLY
 ```
 
-Weitere gezielte Modi sind `LIBRARY_ONLY`, `VERSION5_ONLY`, `DOCK_TEXT_ONLY`, `TEXT_INPUT_ONLY`, `MODULES_ONLY`, `LAVA_ONLY`, `SCREENSAVER_ONLY`, `PREVIEW_ONLY`, `WORLDS_ONLY`, `CITY_ONLY`, `BACKGROUND_ONLY` und `FONTS_ONLY`. Nur den gewünschten Schalter setzen und danach wieder entfernen. Das Skript beendet sich beim ersten zutreffenden Modus. Diese Schalter sind Teststeuerung und keine App-Konfiguration.
+Weitere gezielte Modi sind `TIME_TASK_ONLY`, `LIBRARY_ONLY`, `VERSION5_ONLY`, `DOCK_TEXT_ONLY`, `TEXT_INPUT_ONLY`, `MODULES_ONLY`, `LAVA_ONLY`, `SCREENSAVER_ONLY`, `PREVIEW_ONLY`, `WORLDS_ONLY`, `CITY_ONLY`, `BACKGROUND_ONLY` und `FONTS_ONLY`. Nur den gewünschten Schalter setzen und danach wieder entfernen. Das Skript beendet sich beim ersten zutreffenden Modus. Diese Schalter sind Teststeuerung und keine App-Konfiguration.
 
 Der Gesamtlauf ohne Schalter ist historisch gewachsen. Am 26.11.2026 endete er einschließlich simuliertem Mikrofon mit Exitcode 0. Zusätzlich waren ALARM_ONLY, LAVA_ONLY, SCREENSAVER_ONLY, PREVIEW_ONLY, BACKGROUND_ONLY und FONTS_ONLY erfolgreich. Ein älterer Lauf war zuvor bei der simulierten Mikrofonfreigabe stehengeblieben. Die aktuellen Ergebnisse ersetzen keine Erprobung auf realer Unterrichtshardware.
 

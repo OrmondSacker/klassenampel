@@ -31,6 +31,8 @@ Diese Datei liegt seit der Zusammenführung am 26. November 2026 an der Reposito
 
 23. Benannte Ansichten direkt auf der Seite speichern, öffnen und verwalten können. Vorhandene einzelne Speicherung übernehmen; Tafel-Fotos, Layout und Einstellungen erhalten. Beim Öffnen Zeiten pausieren und die vorherige Arbeitsfläche über Rückgängig erreichbar halten. Die lokale Sammlung nicht ungefragt in HTML-Exporte oder Links aufnehmen.
 
+24. Version 0.5.2 ergänzt ±1 Minute ohne Neustart/Pause, Zeitvorgaben, abschaltbare visuelle Restzeit, sichtbare Arbeitsform und einen optionalen aufklappbaren Zusatzauftrag „Fertig? Dann …“. Diese Elemente innerhalb der bestehenden Aufgabe/Uhr halten und in allen Speicherwegen berücksichtigen.
+
 Neue eigenständige Module mit einer stabilen data-board-Kennung für die allgemeine Modulbedienung registrieren. Der frei positionierte Hauptscreen bleibt auf der Hintergrundebene, damit überlagerte Module beim Verschieben erreichbar bleiben.
 
 ## Gestaltung und Nutzerpräferenzen

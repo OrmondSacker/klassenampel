@@ -4,8 +4,8 @@
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const defaults={taskModule:{x:.03,y:.14},countdownModule:{x:.72,y:.14}};
   const moduleState={taskModule:{collapsed:false,outside:true},countdownModule:{collapsed:false,outside:true}};
-  let layout=structuredClone(defaults), remaining=300, deadline=0, running=false, draggingId=null;
-  const controls=['age','work','duration','sensitivity','threshold','yellowLimit','penEnabled','penPoints','penWorld','penDelay','penStrength','penCooldown','showTask','showCountdown','showHud','showDiscovery','fontFamily','uiFontSize','taskFontSize','clockFontSize','neutralAnimation','countdownSound'];
+  let layout=structuredClone(defaults), remaining=300, countdownTotal=300, deadline=0, running=false, draggingId=null;
+  const controls=['age','work','duration','sensitivity','threshold','yellowLimit','penEnabled','penPoints','penWorld','penDelay','penStrength','penCooldown','showTask','showCountdown','showHud','showDiscovery','fontFamily','uiFontSize','taskFontSize','clockFontSize','neutralAnimation','countdownSound','showWorkMode','showFollowUp','showCountdownProgress'];
   let alarmContext=null,alarmVersion=0,alarmNodes=[];
   try {
     const savedSound=localStorage.getItem('klassenampel-countdown-sound');
@@ -110,12 +110,19 @@
     $('countdownDisplay').textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
     $('countdownStart').textContent=running?'Countdown pausieren':remaining===0?'Erneut starten':'Countdown starten';
     $('countdownMinutes').disabled=running;
+    $('countdownMinus').disabled=remaining<=0;
+    $('countdownPlus').disabled=remaining>=10800;
+    document.querySelectorAll('[data-countdown-preset]').forEach(button=>button.disabled=running);
+    $('countdownProgress').hidden=!$('showCountdownProgress').checked;
+    $('countdownProgress').max=Math.max(1,countdownTotal);
+    $('countdownProgress').value=remaining;
+    $('countdownProgress').setAttribute('aria-valuetext',$('countdownDisplay').textContent+' verbleibend');
     $('countdownModule').classList.toggle('finished',remaining===0);
   }
   function resetCountdown() {
     if(!$('countdownMinutes').reportValidity()) return false;
     stopAlarm();
-    remaining=Number($('countdownMinutes').value)*60; running=false;
+    remaining=Number($('countdownMinutes').value)*60;countdownTotal=remaining;running=false;
     $('countdownStatus').textContent='Bereit'; countdown(); return true;
   }
   $('countdownStart').onclick=()=>{
@@ -127,6 +134,20 @@
     }
     countdown();
   };
+  function adjustCountdown(seconds){
+    countdown();const wasRunning=running,before=remaining,next=clamp(before+seconds,0,10800);
+    if(next===before)return;
+    stopAlarm();countdownTotal=before>0?clamp(countdownTotal+next-before,Math.max(1,next),10800):Math.max(1,next);
+    remaining=next;
+    if(wasRunning){deadline=Date.now()+remaining*1000;running=true;}
+    else $('countdownStatus').textContent=remaining?'Aufgabenzeit angepasst · pausiert':'Bereit';
+    countdown();
+  }
+  $('countdownMinus').onclick=()=>adjustCountdown(-60);
+  $('countdownPlus').onclick=()=>adjustCountdown(60);
+  document.querySelectorAll('[data-countdown-preset]').forEach(button=>button.onclick=()=>{
+    if(running)return;$('countdownMinutes').value=button.dataset.countdownPreset;resetCountdown();
+  });
   $('countdownReset').onclick=resetCountdown;
   $('countdownMinutes').onchange=resetCountdown;
   setInterval(countdown,200);
@@ -229,7 +250,22 @@
       position(id);persistLayout();
     };
   });
+  function taskExtras(){
+    const modes={silent:['✎','Stillarbeit'],pair:['👥','Partnerarbeit'],group:['👥','Gruppenarbeit']};
+    const [icon,label]=modes[$('work').value]||modes.silent;
+    $('workModeIcon').textContent=icon;$('workModeLabel').textContent=label;
+    $('workModeBadge').hidden=!$('showWorkMode').checked;
+    $('taskFollowUp').hidden=!$('showFollowUp').checked;
+    $('countdownProgress').hidden=!$('showCountdownProgress').checked;
+  }
+  function saveTaskExtras(){
+    taskExtras();try{localStorage.setItem('klassenampel-task-extras',JSON.stringify({text:$('followUpTask').value,showFollowUp:$('showFollowUp').checked,showWorkMode:$('showWorkMode').checked,showCountdownProgress:$('showCountdownProgress').checked}));}catch{}
+  }
+  $('work').addEventListener('change',taskExtras);
+  $('followUpTask').oninput=saveTaskExtras;
+  for(const id of ['showWorkMode','showFollowUp','showCountdownProgress'])$(id).addEventListener('change',saveTaskExtras);
   function visibility() {
+    taskExtras();
     for(const [id,el] of Object.entries(modules)) el.hidden=!$(id).checked;
     positions();
   }
@@ -239,7 +275,7 @@
   function snapshot() {
     countdown();
     return {
-      version:1,appVersion:'0.5.1',task:task.value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,
+      version:1,appVersion:'0.5.2',task:task.value,followUpTask:$('followUpTask').value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,countdownTotal,
       game:window.klassenampel.snapshot(),
       controls:Object.fromEntries(controls.map(id=>[id,$(id).type==='checkbox'?$(id).checked:$(id).value])),
       projector:document.body.classList.contains('projector'),
@@ -255,6 +291,10 @@
     stopAlarm();
     window.initialModuleLayout=config.moduleLayout??(config.board?.active?config.board:{version:1,items:{}});
     window.initialWhiteboardState=config.whiteboard??{version:1,objects:[]};
+    $('followUpTask').value=typeof config.followUpTask==='string'?config.followUpTask.slice(0,2000):'';
+    $('showWorkMode').checked=config.controls?.showWorkMode!==false;
+    $('showFollowUp').checked=config.controls?.showFollowUp===true;
+    $('showCountdownProgress').checked=config.controls?.showCountdownProgress!==false;
     if(typeof config.task==='string') task.value=config.task.slice(0,2000);
     for(const id of controls) {
       const el=$(id),val=config.controls?.[id];
@@ -278,6 +318,7 @@
     const minutes=Number(config.countdownMinutes);
     $('countdownMinutes').value=Number.isInteger(minutes)&&minutes>=1&&minutes<=180?minutes:5;
     remaining=Number.isFinite(config.remaining)?clamp(config.remaining,0,10800):300;running=false;
+    countdownTotal=Number.isFinite(config.countdownTotal)?clamp(config.countdownTotal,Math.max(1,remaining),10800):Math.max(remaining,Number($('countdownMinutes').value)*60);
     if(config.game) window.klassenampel.restore(config.game);
     document.body.classList.toggle('projector',config.projector===true);
     $('projector').textContent=config.projector?'Bedienansicht':'Präsentation';
@@ -387,6 +428,11 @@
   else {
     try{
       task.value=localStorage.getItem('klassenampel-task')||'';
+      const extras=JSON.parse(localStorage.getItem('klassenampel-task-extras')||'null');
+      $('followUpTask').value=typeof extras?.text==='string'?extras.text.slice(0,2000):'';
+      $('showFollowUp').checked=extras?.showFollowUp===true;
+      $('showWorkMode').checked=extras?.showWorkMode!==false;
+      $('showCountdownProgress').checked=extras?.showCountdownProgress!==false;
       const stored=JSON.parse(localStorage.getItem('klassenampel-layout')||'null');
       for(const id of Object.keys(layout)) if(Number.isFinite(stored?.[id]?.x)&&Number.isFinite(stored?.[id]?.y)) layout[id]=stored[id];
       const prefs=JSON.parse(localStorage.getItem('klassenampel-module-state')||'null');

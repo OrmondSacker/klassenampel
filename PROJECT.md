@@ -2,6 +2,18 @@
 
 Stand ist der 27. November 2026. Grundlage sind der Gesprächsverlauf, die lokalen Quell- und Ausgabedateien und die unten dokumentierte erneute Bestandsaufnahme.
 
+## Version 0.5.2 – Zeit und Arbeitsauftrag
+
+Auf Nutzerauftrag umgesetzt: Der Aufgaben-Countdown besitzt direkt sichtbare Start-/Pause- und ±1-Minute-Schaltflächen. Anpassungen behalten den laufenden beziehungsweise pausierten Zustand. Die Restzeit wird vor der Änderung anhand der bisherigen Deadline aktualisiert. Verkürzen bis null löst während eines laufenden Countdowns den bestehenden Ablaufalarm einmal aus; Verlängern nach Ablauf bleibt pausiert und setzt den Balken auf den neuen Zeitrahmen. Obergrenze sind weiterhin 180 Minuten. Die Vorgaben 2/5/10/15 Minuten setzen eine neue pausierte Zeit und sind während des Laufens gesperrt.
+
+Ein abschaltbarer progress-Balken zeigt die verbleibende Aufgabenzeit. countdownTotal speichert den Bezugszeitraum; Minutenkorrekturen ändern Zeitbudget und Restzeit gemeinsam. Ältere Ansichten ohne countdownTotal erhalten mindestens den größeren Wert aus Restzeit und eingestellten Minuten. Der Balken besitzt einen zugänglichen Restzeittext.
+
+Die vorhandene Arbeitsform wird im Aufgabenmodul als Symbol plus Text gespiegelt. Ihre Anzeige ist abschaltbar. Ein optionaler aufklappbarer Zusatzauftrag „Fertig? Dann …“ bleibt Teil derselben Aufgabenbox. Die Zusatzanzeige wird unter „Anzeigen im Detail“ eingeschaltet. Snapshot-Feld followUpTask und die Steuerelemente showWorkMode/showFollowUp/showCountdownProgress werden in Bibliothek, HTML und Link übernommen. Für ältere Ansichten gelten Arbeitsform/Balken sichtbar, Zusatzauftrag aus und leer. Einzeländerungen ohne gespeicherte Gesamtansicht werden unter klassenampel-task-extras lokal gehalten.
+
+Bei der Mobil-Sichtprüfung wurde eine vorhandene Konkurrenz zweier Resize-Timer behoben: Der ResizeObserver konnte das automatische Nachordnen nach einem Fenstergrößenwechsel abbrechen. Beide verwenden jetzt unabhängige Timer. Die Fußzeile bleibt bei freier Anordnung unterhalb der Module. Fachliche Gruppen und deren Anzahl bleiben unverändert.
+
+TIME_TASK_ONLY prüft laufende und pausierte Korrektur, Vorgaben und Sperre während des Laufens, Null-/Maximalgrenze, Balken, einmaligen Ablaufalarm, Arbeitsform, Zusatzauftrag, Bibliothek/HTML/Link, ältere Ansichten und überlappungsfreie mobile Neuanordnung. Die bisherigen fachlichen Regressionstests werden ebenfalls ausgeführt. Reale Geräte bleiben durch diesen lokalen Browserlauf nicht zusätzlich geprüft.
+
 ## Version 0.5.1 – Ansichtsbibliothek
 
 Implementiert: Mehrere benannte Ansichten direkt in „Ansicht speichern und teilen“ speichern und öffnen. Einträge können umbenannt, nach ausdrücklicher Bestätigung ersetzt und gelöscht werden. Die aktuelle Arbeitsfläche bleibt beim Löschen erhalten. Die letzte Öffnung kann rückgängig gemacht werden. Beim Öffnen werden Spielrunde und Countdown pausiert; ein noch laufender Countdown-Signalton wird gestoppt. Modul- und Tafeldaten werden über ihre bestehenden validierenden Restorewege zur Laufzeit übernommen, ohne Seitenneuladen. Die Freischaltvorschau wird beim Wechsel vollständig zurückgesetzt beziehungsweise wiederhergestellt.

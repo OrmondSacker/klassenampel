@@ -13,7 +13,7 @@
   const layer=document.createElement('div');layer.id='moduleLayer';root.append(layer);
   let items={},appearance={},colors={},locked={},visible={},preset='world',topLayer=20,automatic=false;
   const history=[];
-  const minimum={mainScreen:[320,600],microphone:[260,220],task:[240,120],countdown:[210,130],whiteboard:[320,300]};
+  const minimum={mainScreen:[320,600],microphone:[260,220],task:[240,170],countdown:[210,260],whiteboard:[320,300]};
   const minimumHeight=entry=>entry.el.tagName==='DETAILS'&&!entry.el.open?60:minimum[entry.id][1];
   const baseColors=new Map(entries.map(entry=>[entry.id,getComputedStyle(entry.el).backgroundColor]));
   const gap=12,snapDistance=18,sizeTolerance=12;
@@ -143,6 +143,7 @@
       }
       entries.forEach(place);
     }
+    root.classList.toggle('free-layout',Object.keys(items).length>0);
     root.style.minHeight=Object.keys(items).length?Math.max(0,...Object.values(items).map(p=>p.y+p.height+30))+'px':'';
   }
   function detach(entry){
@@ -276,7 +277,7 @@
     clone.querySelectorAll('.module-transparency,.module-appearance,.module-properties').forEach(el=>el.remove());
     clone.querySelectorAll('.move-grip:not([data-drag])').forEach(el=>el.remove());
     clone.querySelectorAll('.move-grip').forEach(el=>el.classList.remove('move-grip'));
-    clone.querySelector('main').style.minHeight='';
+    clone.querySelector('main').style.minHeight='';clone.querySelector('main').classList.remove('free-layout');
   }
   function load(saved){
     for(const entry of [...entries].reverse())restoreEntry(entry);items={};
@@ -339,6 +340,7 @@
     if(automatic)autoArrange(false);else refresh();persist();
   });
   document.querySelectorAll('#showTask,#showCountdown').forEach(el=>el.addEventListener('change',()=>{syncChoices();if(automatic)autoArrange(false);}));
-  new ResizeObserver(()=>{clearTimeout(timer);timer=setTimeout(refresh,40);}).observe(root);
+  let observationTimer;
+  new ResizeObserver(()=>{clearTimeout(observationTimer);observationTimer=setTimeout(refresh,40);}).observe(root);
   refresh();
 })();

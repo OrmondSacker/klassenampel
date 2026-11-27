@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.5.1</title><style>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.5.2</title><style>
 :root {
   color-scheme: dark;
   font: 16px/1.45 "Geist", "Segoe UI", system-ui, sans-serif;
@@ -325,14 +325,31 @@ details.movable-module > summary { padding-left: 30px; padding-right: 24px; min-
 .projector #moduleDock {grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
 
 #viewName,#savedViews {display:block;width:100%;margin:8px 0 12px;padding:9px;border:1px solid #64879b;border-radius:8px;background:#102337;color:#f0f7fc;font:inherit;}
+
+/* 0.5.2: time and work guidance stay inside their existing modules. */
+.countdown-quick,.countdown-presets {display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+.countdown-quick button {flex:1;min-width:70px;padding:6px 8px;font-size:.85rem;}
+.countdown-presets {width:100%;}
+.countdown-presets button {flex:1 1 40%;padding:6px;font-size:.85rem;}
+#countdownProgress {display:block;width:100%;height:10px;margin:10px 0;accent-color:#8aead7;}
+#countdownProgress::-webkit-progress-value {background:#8aead7;}
+.work-mode-badge {display:flex;align-items:center;gap:8px;width:fit-content;max-width:100%;padding:5px 9px;margin:7px 0 10px;border:1px solid #64879b;border-radius:8px;background:#203a4e;color:#e1f0f4;font-size:.85rem;}
+#taskFollowUp {margin-top:10px;}
+#taskFollowUp summary {font-size:.88rem;}
+#followUpTask {font-family:inherit;font-size:var(--task-font-size,20px);margin-top:8px;min-height:85px;}
+
+.free-layout > footer {position:absolute;top:100%;left:12px;right:12px;margin:0;padding-bottom:12px;}
+#countdownStart {width:100%;margin:0 0 8px;}
 </style></head><body><main>
-<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.5.1</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
+<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.5.2</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
 <section id="workspaceMenu" class="workspace-menu" hidden aria-label="Module und Einstellungen"><div class="menu-heading"><strong>Dein Arbeitsplatz</strong><button id="menuClose" aria-label="Menü schließen">×</button></div><div class="menu-grid"><section><h2>Anzeigen</h2><div id="moduleChoices"></div><div class="actions"><button id="autoArrange">Automatisch anordnen</button><button id="layoutUndo" disabled>Anordnung zurück</button></div><label for="layoutPreset">Anordnung</label><select id="layoutPreset"><option value="world">Spielwelt im Mittelpunkt</option><option value="task">Aufgabe & Uhr</option><option value="board">Tafel im Mittelpunkt</option></select><details class="panel" data-setting="modules" id="details-modules">
-        <summary>Anzeige im Spielmodul</summary>
+        <summary>Anzeigen im Detail</summary>
         <div class="row" hidden><label for="showTask">Aufgabenbox anzeigen</label><input id="showTask" type="checkbox" checked></div>
         <div class="row" hidden><label for="showCountdown">Countdown anzeigen</label><input id="showCountdown" type="checkbox" checked></div>
         <div class="row"><label for="showHud">Spielstand anzeigen</label><input id="showHud" type="checkbox" checked></div>
         <div class="row"><label for="showDiscovery">Entdeckungen anzeigen</label><input id="showDiscovery" type="checkbox" checked></div>
+        <div class="row"><label for="showWorkMode">Arbeitsform bei der Aufgabe</label><input id="showWorkMode" type="checkbox" checked></div>
+        <div class="row"><label for="showFollowUp">„Fertig? Dann …“ bei der Aufgabe</label><input id="showFollowUp" type="checkbox"></div>
         <button id="resetLayout">Positionen zurücksetzen</button>
         <p class="hint">Boxen am Griff in die Spielwelt oder nach außen ziehen.</p>
       </details></section><section><h2>Unterricht</h2><details class="panel" data-setting="teaching" id="details-teaching">
@@ -484,16 +501,23 @@ details.movable-module > summary { padding-left: 30px; padding-right: 24px; min-
         <p id="whiteboardStatus" class="hint" role="status">Mit Stift zeichnen oder Text und Fotos hinzufügen. Objekte mit „Verschieben“ anordnen.</p>
       </section></div><aside class="side" aria-label="Arbeitsmodule"><div id="moduleDock" class="module-dock"><section id="taskModule" class="panel task-panel floating-module" aria-labelledby="taskLabel" data-board="task">
         <button class="drag-handle" data-drag="taskModule" aria-label="Aufgabenbox verschieben, auch mit Pfeiltasten">⠿ Aufgabe verschieben</button><label id="taskLabel" for="taskText">Eure Aufgabe</label>
+        <p id="workModeBadge" class="work-mode-badge"><span id="workModeIcon" aria-hidden="true">✎</span><span id="workModeLabel">Stillarbeit</span></p>
         <textarea id="taskText" rows="3" maxlength="2000" placeholder="Was soll die Klasse bearbeiten?"></textarea>
+        <details id="taskFollowUp" hidden><summary>Fertig? Dann …</summary><textarea id="followUpTask" rows="2" maxlength="2000" aria-label="Zusatzauftrag nach dem Fertigstellen" placeholder="Zum Beispiel: Kontrolliere deine Ergebnisse."></textarea></details>
       </section><section id="countdownModule" class="panel countdown-panel floating-module" aria-labelledby="countdownLabel" data-board="countdown">
         <button class="drag-handle" data-drag="countdownModule" aria-label="Countdown verschieben, auch mit Pfeiltasten">⠿ Uhr verschieben</button><h2 id="countdownLabel">Aufgaben-Countdown</h2>
         <output id="countdownDisplay" role="timer">05:00</output>
+        <progress id="countdownProgress" value="300" max="300" aria-label="Verbleibende Aufgabenzeit"></progress>
+        <div class="countdown-quick"><button id="countdownMinus" type="button" aria-label="Aufgabenzeit um eine Minute verkürzen">−1 min</button><button id="countdownPlus" type="button" aria-label="Aufgabenzeit um eine Minute verlängern">+1 min</button></div>
+        <button id="countdownStart">Countdown starten</button>
         <details class="module-settings" id="countdownSettings"><summary>Uhr einstellen</summary><div class="actions">
+          <div class="countdown-presets" role="group" aria-label="Aufgabenzeit neu setzen"><button type="button" data-countdown-preset="2">2 min</button><button type="button" data-countdown-preset="5">5 min</button><button type="button" data-countdown-preset="10">10 min</button><button type="button" data-countdown-preset="15">15 min</button></div>
           <label for="countdownMinutes">Minuten</label>
           <input id="countdownMinutes" type="number" min="1" max="180" step="1" value="5" required>
-          <button id="countdownStart">Countdown starten</button>
+
           <button id="countdownReset">Neu setzen</button>
         </div>
+        <div class="row"><label for="showCountdownProgress">Restzeit als Balken anzeigen</label><input id="showCountdownProgress" type="checkbox" checked></div>
         <div class="row"><label for="countdownSound">Signalton bei Ablauf</label><input id="countdownSound" type="checkbox" checked></div>
         </details><p id="countdownStatus" class="hint" aria-live="polite">Bereit</p>
       </section></div><details class="panel" open data-board="microphone" id="details-microphone">
@@ -1810,8 +1834,8 @@ function createWorldRenderer(canvas) {
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const defaults={taskModule:{x:.03,y:.14},countdownModule:{x:.72,y:.14}};
   const moduleState={taskModule:{collapsed:false,outside:true},countdownModule:{collapsed:false,outside:true}};
-  let layout=structuredClone(defaults), remaining=300, deadline=0, running=false, draggingId=null;
-  const controls=['age','work','duration','sensitivity','threshold','yellowLimit','penEnabled','penPoints','penWorld','penDelay','penStrength','penCooldown','showTask','showCountdown','showHud','showDiscovery','fontFamily','uiFontSize','taskFontSize','clockFontSize','neutralAnimation','countdownSound'];
+  let layout=structuredClone(defaults), remaining=300, countdownTotal=300, deadline=0, running=false, draggingId=null;
+  const controls=['age','work','duration','sensitivity','threshold','yellowLimit','penEnabled','penPoints','penWorld','penDelay','penStrength','penCooldown','showTask','showCountdown','showHud','showDiscovery','fontFamily','uiFontSize','taskFontSize','clockFontSize','neutralAnimation','countdownSound','showWorkMode','showFollowUp','showCountdownProgress'];
   let alarmContext=null,alarmVersion=0,alarmNodes=[];
   try {
     const savedSound=localStorage.getItem('klassenampel-countdown-sound');
@@ -1916,12 +1940,19 @@ function createWorldRenderer(canvas) {
     $('countdownDisplay').textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
     $('countdownStart').textContent=running?'Countdown pausieren':remaining===0?'Erneut starten':'Countdown starten';
     $('countdownMinutes').disabled=running;
+    $('countdownMinus').disabled=remaining<=0;
+    $('countdownPlus').disabled=remaining>=10800;
+    document.querySelectorAll('[data-countdown-preset]').forEach(button=>button.disabled=running);
+    $('countdownProgress').hidden=!$('showCountdownProgress').checked;
+    $('countdownProgress').max=Math.max(1,countdownTotal);
+    $('countdownProgress').value=remaining;
+    $('countdownProgress').setAttribute('aria-valuetext',$('countdownDisplay').textContent+' verbleibend');
     $('countdownModule').classList.toggle('finished',remaining===0);
   }
   function resetCountdown() {
     if(!$('countdownMinutes').reportValidity()) return false;
     stopAlarm();
-    remaining=Number($('countdownMinutes').value)*60; running=false;
+    remaining=Number($('countdownMinutes').value)*60;countdownTotal=remaining;running=false;
     $('countdownStatus').textContent='Bereit'; countdown(); return true;
   }
   $('countdownStart').onclick=()=>{
@@ -1933,6 +1964,20 @@ function createWorldRenderer(canvas) {
     }
     countdown();
   };
+  function adjustCountdown(seconds){
+    countdown();const wasRunning=running,before=remaining,next=clamp(before+seconds,0,10800);
+    if(next===before)return;
+    stopAlarm();countdownTotal=before>0?clamp(countdownTotal+next-before,Math.max(1,next),10800):Math.max(1,next);
+    remaining=next;
+    if(wasRunning){deadline=Date.now()+remaining*1000;running=true;}
+    else $('countdownStatus').textContent=remaining?'Aufgabenzeit angepasst · pausiert':'Bereit';
+    countdown();
+  }
+  $('countdownMinus').onclick=()=>adjustCountdown(-60);
+  $('countdownPlus').onclick=()=>adjustCountdown(60);
+  document.querySelectorAll('[data-countdown-preset]').forEach(button=>button.onclick=()=>{
+    if(running)return;$('countdownMinutes').value=button.dataset.countdownPreset;resetCountdown();
+  });
   $('countdownReset').onclick=resetCountdown;
   $('countdownMinutes').onchange=resetCountdown;
   setInterval(countdown,200);
@@ -2035,7 +2080,22 @@ function createWorldRenderer(canvas) {
       position(id);persistLayout();
     };
   });
+  function taskExtras(){
+    const modes={silent:['✎','Stillarbeit'],pair:['👥','Partnerarbeit'],group:['👥','Gruppenarbeit']};
+    const [icon,label]=modes[$('work').value]||modes.silent;
+    $('workModeIcon').textContent=icon;$('workModeLabel').textContent=label;
+    $('workModeBadge').hidden=!$('showWorkMode').checked;
+    $('taskFollowUp').hidden=!$('showFollowUp').checked;
+    $('countdownProgress').hidden=!$('showCountdownProgress').checked;
+  }
+  function saveTaskExtras(){
+    taskExtras();try{localStorage.setItem('klassenampel-task-extras',JSON.stringify({text:$('followUpTask').value,showFollowUp:$('showFollowUp').checked,showWorkMode:$('showWorkMode').checked,showCountdownProgress:$('showCountdownProgress').checked}));}catch{}
+  }
+  $('work').addEventListener('change',taskExtras);
+  $('followUpTask').oninput=saveTaskExtras;
+  for(const id of ['showWorkMode','showFollowUp','showCountdownProgress'])$(id).addEventListener('change',saveTaskExtras);
   function visibility() {
+    taskExtras();
     for(const [id,el] of Object.entries(modules)) el.hidden=!$(id).checked;
     positions();
   }
@@ -2045,7 +2105,7 @@ function createWorldRenderer(canvas) {
   function snapshot() {
     countdown();
     return {
-      version:1,appVersion:'0.5.1',task:task.value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,
+      version:1,appVersion:'0.5.2',task:task.value,followUpTask:$('followUpTask').value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,countdownTotal,
       game:window.klassenampel.snapshot(),
       controls:Object.fromEntries(controls.map(id=>[id,$(id).type==='checkbox'?$(id).checked:$(id).value])),
       projector:document.body.classList.contains('projector'),
@@ -2061,6 +2121,10 @@ function createWorldRenderer(canvas) {
     stopAlarm();
     window.initialModuleLayout=config.moduleLayout??(config.board?.active?config.board:{version:1,items:{}});
     window.initialWhiteboardState=config.whiteboard??{version:1,objects:[]};
+    $('followUpTask').value=typeof config.followUpTask==='string'?config.followUpTask.slice(0,2000):'';
+    $('showWorkMode').checked=config.controls?.showWorkMode!==false;
+    $('showFollowUp').checked=config.controls?.showFollowUp===true;
+    $('showCountdownProgress').checked=config.controls?.showCountdownProgress!==false;
     if(typeof config.task==='string') task.value=config.task.slice(0,2000);
     for(const id of controls) {
       const el=$(id),val=config.controls?.[id];
@@ -2084,6 +2148,7 @@ function createWorldRenderer(canvas) {
     const minutes=Number(config.countdownMinutes);
     $('countdownMinutes').value=Number.isInteger(minutes)&&minutes>=1&&minutes<=180?minutes:5;
     remaining=Number.isFinite(config.remaining)?clamp(config.remaining,0,10800):300;running=false;
+    countdownTotal=Number.isFinite(config.countdownTotal)?clamp(config.countdownTotal,Math.max(1,remaining),10800):Math.max(remaining,Number($('countdownMinutes').value)*60);
     if(config.game) window.klassenampel.restore(config.game);
     document.body.classList.toggle('projector',config.projector===true);
     $('projector').textContent=config.projector?'Bedienansicht':'Präsentation';
@@ -2193,6 +2258,11 @@ function createWorldRenderer(canvas) {
   else {
     try{
       task.value=localStorage.getItem('klassenampel-task')||'';
+      const extras=JSON.parse(localStorage.getItem('klassenampel-task-extras')||'null');
+      $('followUpTask').value=typeof extras?.text==='string'?extras.text.slice(0,2000):'';
+      $('showFollowUp').checked=extras?.showFollowUp===true;
+      $('showWorkMode').checked=extras?.showWorkMode!==false;
+      $('showCountdownProgress').checked=extras?.showCountdownProgress!==false;
       const stored=JSON.parse(localStorage.getItem('klassenampel-layout')||'null');
       for(const id of Object.keys(layout)) if(Number.isFinite(stored?.[id]?.x)&&Number.isFinite(stored?.[id]?.y)) layout[id]=stored[id];
       const prefs=JSON.parse(localStorage.getItem('klassenampel-module-state')||'null');
@@ -2228,7 +2298,7 @@ function createWorldRenderer(canvas) {
   const layer=document.createElement('div');layer.id='moduleLayer';root.append(layer);
   let items={},appearance={},colors={},locked={},visible={},preset='world',topLayer=20,automatic=false;
   const history=[];
-  const minimum={mainScreen:[320,600],microphone:[260,220],task:[240,120],countdown:[210,130],whiteboard:[320,300]};
+  const minimum={mainScreen:[320,600],microphone:[260,220],task:[240,170],countdown:[210,260],whiteboard:[320,300]};
   const minimumHeight=entry=>entry.el.tagName==='DETAILS'&&!entry.el.open?60:minimum[entry.id][1];
   const baseColors=new Map(entries.map(entry=>[entry.id,getComputedStyle(entry.el).backgroundColor]));
   const gap=12,snapDistance=18,sizeTolerance=12;
@@ -2358,6 +2428,7 @@ function createWorldRenderer(canvas) {
       }
       entries.forEach(place);
     }
+    root.classList.toggle('free-layout',Object.keys(items).length>0);
     root.style.minHeight=Object.keys(items).length?Math.max(0,...Object.values(items).map(p=>p.y+p.height+30))+'px':'';
   }
   function detach(entry){
@@ -2491,7 +2562,7 @@ function createWorldRenderer(canvas) {
     clone.querySelectorAll('.module-transparency,.module-appearance,.module-properties').forEach(el=>el.remove());
     clone.querySelectorAll('.move-grip:not([data-drag])').forEach(el=>el.remove());
     clone.querySelectorAll('.move-grip').forEach(el=>el.classList.remove('move-grip'));
-    clone.querySelector('main').style.minHeight='';
+    clone.querySelector('main').style.minHeight='';clone.querySelector('main').classList.remove('free-layout');
   }
   function load(saved){
     for(const entry of [...entries].reverse())restoreEntry(entry);items={};
@@ -2554,7 +2625,8 @@ function createWorldRenderer(canvas) {
     if(automatic)autoArrange(false);else refresh();persist();
   });
   document.querySelectorAll('#showTask,#showCountdown').forEach(el=>el.addEventListener('change',()=>{syncChoices();if(automatic)autoArrange(false);}));
-  new ResizeObserver(()=>{clearTimeout(timer);timer=setTimeout(refresh,40);}).observe(root);
+  let observationTimer;
+  new ResizeObserver(()=>{clearTimeout(observationTimer);observationTimer=setTimeout(refresh,40);}).observe(root);
   refresh();
 })();
 

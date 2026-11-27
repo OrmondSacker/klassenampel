@@ -4,6 +4,12 @@ Stand ist der 27. November 2026. Diese Roadmap wurde nach der Bestandsaufnahme i
 
 ## Zuletzt umgesetzte Nutzeranforderungen
 
+### Version 0.5.2 – Unterrichtskomfort
+
+Das bestätigte Viererpaket aus Timer-Schnellbedienung, visueller Restzeit, sichtbarer Arbeitsform und optionalem Zusatzauftrag ist umgesetzt. Kein neues Arbeitsmodul und keine neue Spielregel. Vorgaben und Abschaltoptionen befinden sich bei der Uhr beziehungsweise unter „Anzeigen im Detail“. Bei der Prüfung wurde zusätzlich das automatische Nachordnen nach Fenstergrößenwechseln korrigiert.
+
+Die weiteren Vergleichsideen (Vorlagenstart ohne alten Spielstand, komplette Sammlung übertragen, ruhiger Beamerbetrieb, sichtbares Klassenziel, Stundenphasen und Geräteauswahl) sind weiterhin Vorschläge und nicht Teil dieses Auftrags.
+
 ### Version 0.5.1 – gespeicherte Inhalte wieder öffnen
 
 Die benannte lokale Ansichtsbibliothek mit Öffnen, Öffnen-Rückgängig, Umbenennen, Ersetzen, Löschen und Übernahme bisheriger Speicherungen ist umgesetzt und geprüft. Cloud-Synchronisierung und die Übertragung einer kompletten Sammlung sind weiterhin keine implementierten Funktionen.

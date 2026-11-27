@@ -324,3 +324,18 @@ details.movable-module > summary { padding-left: 30px; padding-right: 24px; min-
 .projector #moduleDock {grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
 
 #viewName,#savedViews {display:block;width:100%;margin:8px 0 12px;padding:9px;border:1px solid #64879b;border-radius:8px;background:#102337;color:#f0f7fc;font:inherit;}
+
+/* 0.5.2: time and work guidance stay inside their existing modules. */
+.countdown-quick,.countdown-presets {display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+.countdown-quick button {flex:1;min-width:70px;padding:6px 8px;font-size:.85rem;}
+.countdown-presets {width:100%;}
+.countdown-presets button {flex:1 1 40%;padding:6px;font-size:.85rem;}
+#countdownProgress {display:block;width:100%;height:10px;margin:10px 0;accent-color:#8aead7;}
+#countdownProgress::-webkit-progress-value {background:#8aead7;}
+.work-mode-badge {display:flex;align-items:center;gap:8px;width:fit-content;max-width:100%;padding:5px 9px;margin:7px 0 10px;border:1px solid #64879b;border-radius:8px;background:#203a4e;color:#e1f0f4;font-size:.85rem;}
+#taskFollowUp {margin-top:10px;}
+#taskFollowUp summary {font-size:.88rem;}
+#followUpTask {font-family:inherit;font-size:var(--task-font-size,20px);margin-top:8px;min-height:85px;}
+
+.free-layout > footer {position:absolute;top:100%;left:12px;right:12px;margin:0;padding-bottom:12px;}
+#countdownStart {width:100%;margin:0 0 8px;}
