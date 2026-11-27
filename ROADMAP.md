@@ -4,6 +4,12 @@ Stand ist der 27. November 2026. Diese Roadmap wurde nach der Bestandsaufnahme i
 
 ## Zuletzt umgesetzte Nutzeranforderungen
 
+### Version 0.5.3 – Tafel und Spielwelt direkt wechseln
+
+Direkter Fokus-Schalter, klickbare Arbeitsform, erweiterte Text-/Pinselwerkzeuge, Objektskalierung und echte Ebenen sowie lokale PDF-Seitenauswahl sind umgesetzt. Keine separate Tafelansicht und keine neue Spielmechanik. PDF-Seiten werden als Bilder gespeichert, nicht als editierbare PDF-Dokumente.
+
+Weiterhin offen: längere Performanceprüfung mit sehr vielen Tafelobjekten und komplexen/ungewöhnlichen PDFs auf den tatsächlichen Schulgeräten. Automatische PDF-Texterkennung, Cloud-PDF-Verwaltung und Import kompletter umfangreicher Dokumente sind nicht Bestandteil des Auftrags.
+
 ### Version 0.5.2 – Unterrichtskomfort
 
 Das bestätigte Viererpaket aus Timer-Schnellbedienung, visueller Restzeit, sichtbarer Arbeitsform und optionalem Zusatzauftrag ist umgesetzt. Kein neues Arbeitsmodul und keine neue Spielregel. Vorgaben und Abschaltoptionen befinden sich bei der Uhr beziehungsweise unter „Anzeigen im Detail“. Bei der Prüfung wurde zusätzlich das automatische Nachordnen nach Fenstergrößenwechseln korrigiert.

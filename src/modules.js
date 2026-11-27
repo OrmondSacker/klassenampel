@@ -296,7 +296,7 @@
       if(p.parent?.target==='mainScreen'&&id!=='mainScreen'&&Number.isFinite(p.parent.x)&&Number.isFinite(p.parent.y))items[id].parent={target:'mainScreen',x:clamp(p.parent.x,0,1),y:clamp(p.parent.y,0,1)};
       topLayer=Math.max(topLayer,items[id].z);
     }
-    $('layoutPreset').value=preset;refresh();
+    $('layoutPreset').value=preset;syncFocusButton();refresh();
   }
   function openMenu(){ syncChoices();$('workspaceMenu').hidden=false;$('menuToggle').setAttribute('aria-expanded','true'); }
   function closeMenu(){ $('workspaceMenu').hidden=true;$('menuToggle').setAttribute('aria-expanded','false'); }
@@ -321,7 +321,23 @@
   $('moduleColor').oninput=()=>{colors[$('appearanceTarget').value]=$('moduleColor').value;refresh();persist();};
   $('moduleLocked').onchange=()=>{locked[$('appearanceTarget').value]=$('moduleLocked').checked;refresh();persist();};
   $('layoutUndo').onclick=()=>{const state=history.pop();if(state){load(state);persist();syncChoices();selectAppearance($('appearanceTarget').value);} $('layoutUndo').disabled=!history.length;};
-  $('layoutPreset').onchange=()=>{remember();preset=$('layoutPreset').value;if(preset==='board')visible.whiteboard=true;autoArrange(false);};
+  function syncFocusButton(){ $('swapFocus').setAttribute('aria-label',preset==='board'?'Spielwelt im Mittelpunkt anzeigen':'Tafel im Mittelpunkt anzeigen');$('swapFocus').title=preset==='board'?'Spielwelt im Mittelpunkt':'Tafel im Mittelpunkt';$('swapFocus').dataset.short=preset==='board'?'Spielwelt':'Tafel';$('swapFocus').textContent=preset==='board'?'Spielwelt im Mittelpunkt':'Tafel im Mittelpunkt';$('swapFocus').setAttribute('aria-pressed',String(preset==='board')); }
+  $('swapFocus').onclick=()=>{
+    remember();const toBoard=preset!=='board',game=entries.find(e=>e.id==='mainScreen'),board=entries.find(e=>e.id==='whiteboard');
+    const active=toBoard?game:board,next=toBoard?board:game;
+    const activeRect=areaRect(active.el),nextRect=areaRect(next.el),wasHidden=next.el.hidden;
+    visible.mainScreen=true;visible.whiteboard=true;refresh();
+    detach(game);detach(board);automatic=true;
+    const padding=parseFloat(getComputedStyle(root).paddingLeft)||12;
+    const top=document.querySelector('.masthead').offsetHeight+padding+12;
+    const primary={x:clamp(activeRect.left/root.clientWidth,0,1),y:top,width:Math.max(.5,activeRect.width/root.clientWidth),height:Math.max(600,activeRect.height)};
+    const secondary=wasHidden||nextRect.width<100||items[next.id]?.parent?{...primary,y:top+primary.height+12}:{x:nextRect.left/root.clientWidth,y:Math.max(top+primary.height+12,nextRect.top),width:nextRect.width/root.clientWidth,height:Math.max(300,nextRect.height)};
+    for(const entry of [game,board]){delete items[entry.id].dock;delete items[entry.id].parent;}
+    Object.assign(items[next.id],primary);Object.assign(items[active.id],secondary);
+    preset=toBoard?'board':'world';$('layoutPreset').value=preset;syncFocusButton();refresh();persist();syncChoices();
+    window.scrollTo({top:0,behavior:'instant'});
+  };
+  $('layoutPreset').onchange=()=>{remember();preset=$('layoutPreset').value;if(preset==='board')visible.whiteboard=true;syncFocusButton();autoArrange(false);};
   let saved=window.initialModuleLayout;if(!saved)try{saved=JSON.parse(localStorage.getItem('klassenampel-modules')||'null');}catch{}
   if(!saved)visible.whiteboard=false;
   restoring=false;

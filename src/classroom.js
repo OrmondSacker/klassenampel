@@ -254,6 +254,7 @@
     const modes={silent:['✎','Stillarbeit'],pair:['👥','Partnerarbeit'],group:['👥','Gruppenarbeit']};
     const [icon,label]=modes[$('work').value]||modes.silent;
     $('workModeIcon').textContent=icon;$('workModeLabel').textContent=label;
+    $('workModeBadge').setAttribute('aria-label','Arbeitsform: '+label+'. Klicken zum Wechseln.');
     $('workModeBadge').hidden=!$('showWorkMode').checked;
     $('taskFollowUp').hidden=!$('showFollowUp').checked;
     $('countdownProgress').hidden=!$('showCountdownProgress').checked;
@@ -262,6 +263,7 @@
     taskExtras();try{localStorage.setItem('klassenampel-task-extras',JSON.stringify({text:$('followUpTask').value,showFollowUp:$('showFollowUp').checked,showWorkMode:$('showWorkMode').checked,showCountdownProgress:$('showCountdownProgress').checked}));}catch{}
   }
   $('work').addEventListener('change',taskExtras);
+  $('workModeBadge').onclick=()=>{const modes=['silent','pair','group'];$('work').value=modes[(modes.indexOf($('work').value)+1)%modes.length];$('work').dispatchEvent(new Event('change'));};
   $('followUpTask').oninput=saveTaskExtras;
   for(const id of ['showWorkMode','showFollowUp','showCountdownProgress'])$(id).addEventListener('change',saveTaskExtras);
   function visibility() {
@@ -275,7 +277,7 @@
   function snapshot() {
     countdown();
     return {
-      version:1,appVersion:'0.5.2',task:task.value,followUpTask:$('followUpTask').value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,countdownTotal,
+      version:1,appVersion:'0.5.3',task:task.value,followUpTask:$('followUpTask').value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,countdownTotal,
       game:window.klassenampel.snapshot(),
       controls:Object.fromEntries(controls.map(id=>[id,$(id).type==='checkbox'?$(id).checked:$(id).value])),
       projector:document.body.classList.contains('projector'),

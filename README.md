@@ -1,6 +1,6 @@
 # KlassenAmpel
 
-Version 0.5.2, Stand 27. November 2026. Die bisherige Version 0.4 wurde in fünf zusammengehörige Arbeitsmodule und ein zentrales Menü überführt.
+Version 0.5.3, Stand 27. November 2026. Die bisherige Version 0.4 wurde in fünf zusammengehörige Arbeitsmodule und ein zentrales Menü überführt.
 
 Die KlassenAmpel ist eine deutschsprachige Web-App für den Unterricht. Sie verbindet eine Mikrofon-Lautstärkeampel mit einer Spielrunde, gemeinsamem Fortschritt, Aufgabenfeld und unabhängigem Aufgaben-Countdown. Sie richtet sich an Grundschule und Berufskolleg und soll auf Unterrichtsrechnern, interaktiven Tafeln sowie mobilen Geräten nutzbar sein.
 
@@ -24,6 +24,10 @@ Die Dokumentation basiert auf dem bisherigen Gespräch und den tatsächlich vorh
 
 Die Arbeitsform erscheint bei der Aufgabe als Symbol mit Text. Unter „Module & Einstellungen → Anzeigen → Anzeigen im Detail“ kannst du sie ausblenden und den Zusatzauftrag „Fertig? Dann …“ einschalten. Der Zusatzauftrag ist innerhalb der Aufgabenbox aufklappbar und wird mitgespeichert.
 
+In der Kopfzeile tauscht „Tafel im Mittelpunkt“ beziehungsweise „Spielwelt im Mittelpunkt“ beide Module direkt. Der Schalter bleibt beim Scrollen erreichbar und führt zur oberen Arbeitsfläche zurück. Runde, Mikrofon und Countdown werden dabei nicht pausiert.
+
+Die Arbeitsform bei der Aufgabe lässt sich per Klick durch Stillarbeit, Partnerarbeit und Gruppenarbeit wechseln. Dabei werden dieselben Pegelprofile wie bei der bisherigen Auswahl unter Unterricht angewendet.
+
 Die fünf Arbeitsmodule sind Spielwelt, Lautstärkeampel, Aufgabe, Countdown und Tafel. Punkte, Rundenrestzeit, Fortschritt, Weltaktion und Rundensteuerung bleiben fest im Spielmodul. Einstellungen besitzen keine eigenen Verschiebegriffe. Die Tafel lässt sich im Menü zuschalten.
 
 „Module & Einstellungen“ enthält eine Mehrfachauswahl der Arbeitsmodule sowie Unterricht, Darstellung und Speichern/Teilen. Das Menü bleibt bei mehreren Auswahlklicks geöffnet. Änderungen an aufgeklappten Einstellungen verschieben die Arbeitsfläche nicht.
@@ -35,6 +39,10 @@ Arbeitsmodule lassen sich am Griff ⠿ bewegen und am Pfeil ↘ skalieren. Griff
 Magnetische Außenkanten halten zwölf Pixel Abstand. Oben/unten wird die Breite angeglichen; seitlich bleiben inhaltsgerechte Höhen erhalten. Alt unterdrückt das Einrasten. Aufgabe, Countdown und Tafel können bewusst vollständig in der Spielszene abgelegt werden; die Zielmarkierung zeigt das Einbetten an. Zufällige Überdeckung anderer Module erzeugt keine neue Gruppe.
 
 Das eigenständige Modul „Tafel“ bietet Stift, Radierer, Textfelder direkt auf der Tafel und lokale Fotos. „Textfeld hinzufügen“ oder das Textfeldwerkzeug erzeugt ein bearbeitbares Feld auf der Zeichenfläche. Darin lässt sich mehrzeilig schreiben. Eigene Griffe verschieben und vergrößern die Felder. Ein separates Texteingabefeld oberhalb der Tafel gibt es nicht. „Verschieben“ wählt Bilder und Striche aus. „Auswahl löschen“ entfernt einzelne Objekte; Textfelder haben zusätzlich ein ×. Ein ausgewähltes Foto lässt sich mit „Fotogröße“ oder seiner unteren rechten Ecke proportional skalieren. „Transparenz“ wirkt auf das ausgewählte Tafelobjekt. Rückgängig stellt auch gelöschte Objekte wieder her.
+
+Die Tafel bietet zusätzlich Schnellfarben, Textmarker und Kreide. Unter „Objekte & Text gestalten“ lassen sich auch verdeckte Objekte auswählen, nach vorne/hinten legen und nachträglich skalieren. Ausgewählter Text kann fett, kursiv, unterstrichen sowie links, mittig oder rechts ausgerichtet werden; Schriftart und Textgröße sind separat änderbar.
+
+„PDF einfügen“ öffnet eine lokale PDF bis 20 MB mit Seitenauswahl. „Seite auf Tafel einfügen“ übernimmt die gewählte Seite als Bild; weitere Seiten können einzeln ergänzt werden. Die eingefügten Seiten sind verschiebbar, skalierbar und beschreibbar, ihr ursprünglicher PDF-Text wird nicht als bearbeitbarer Tafeltext übernommen. PDF-Verarbeitung und HTML-Export funktionieren ohne Upload und ohne externe Bibliotheksabrufe. PDF.js 6.5.438 samt Worker und Apache-2.0-Lizenz liegt in `vendor/pdfjs/` und wird beim Build in die Einzeldatei eingebettet. Daher ist die HTML jetzt ungefähr 2,7 MB groß. Für einen eigenen Build muss auch der vendor-Ordner vorhanden sein.
 
 Anordnung, Größen und Tafelinhalt werden mit der Ansicht gespeichert und als HTML exportiert. Fotos werden lokal eingelesen, verkleinert und in der Ansicht eingebettet. Ansichtslinks können dadurch sehr lang werden. Für Ansichten mit Fotos ist die HTML-Datei der praktische Übertragungsweg.
 
@@ -119,7 +127,7 @@ node tests/browser-check.cjs
 Remove-Item Env:ALARM_ONLY
 ```
 
-Weitere gezielte Modi sind `TIME_TASK_ONLY`, `LIBRARY_ONLY`, `VERSION5_ONLY`, `DOCK_TEXT_ONLY`, `TEXT_INPUT_ONLY`, `MODULES_ONLY`, `LAVA_ONLY`, `SCREENSAVER_ONLY`, `PREVIEW_ONLY`, `WORLDS_ONLY`, `CITY_ONLY`, `BACKGROUND_ONLY` und `FONTS_ONLY`. Nur den gewünschten Schalter setzen und danach wieder entfernen. Das Skript beendet sich beim ersten zutreffenden Modus. Diese Schalter sind Teststeuerung und keine App-Konfiguration.
+Weitere gezielte Modi sind `BOARD_PLUS_ONLY`, `TIME_TASK_ONLY`, `LIBRARY_ONLY`, `VERSION5_ONLY`, `DOCK_TEXT_ONLY`, `TEXT_INPUT_ONLY`, `MODULES_ONLY`, `LAVA_ONLY`, `SCREENSAVER_ONLY`, `PREVIEW_ONLY`, `WORLDS_ONLY`, `CITY_ONLY`, `BACKGROUND_ONLY` und `FONTS_ONLY`. Nur den gewünschten Schalter setzen und danach wieder entfernen. Das Skript beendet sich beim ersten zutreffenden Modus. Diese Schalter sind Teststeuerung und keine App-Konfiguration.
 
 Der Gesamtlauf ohne Schalter ist historisch gewachsen. Am 26.11.2026 endete er einschließlich simuliertem Mikrofon mit Exitcode 0. Zusätzlich waren ALARM_ONLY, LAVA_ONLY, SCREENSAVER_ONLY, PREVIEW_ONLY, BACKGROUND_ONLY und FONTS_ONLY erfolgreich. Ein älterer Lauf war zuvor bei der simulierten Mikrofonfreigabe stehengeblieben. Die aktuellen Ergebnisse ersetzen keine Erprobung auf realer Unterrichtshardware.
 

@@ -105,6 +105,59 @@ async function verify() {
     assert.equal(await value('penDelay'),'5');
     assert.equal(await value('penStrength'),'medium');
     assert.equal(await value('penCooldown'),'20');
+    if(process.env.BOARD_PLUS_ONLY) {
+      await click('#demo');await click('#play');await click('#countdownStart');await step(1);
+      const oldTime=await label('timeLeft');
+      await click('#swapFocus');assert.equal(await label('swapFocus'),'Spielwelt im Mittelpunkt');assert.equal(await evaluate("document.getElementById('whiteboardModule').hidden"),false);
+      assert.equal(await label('play'),'Pause');assert.equal(await label('countdownStart'),'Countdown pausieren');assert.equal(await label('timeLeft'),oldTime);
+      const rect=selector=>evaluate(`(()=>{const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}})()`);
+      assert((await rect('#whiteboardModule')).y<(await rect('[data-board=mainScreen]')).y);
+      await click('#workModeBadge');assert.equal(await label('workModeLabel'),'Gruppenarbeit');await click('#workModeBadge');assert.equal(await label('workModeLabel'),'Stillarbeit');await click('#workModeBadge');assert.equal(await label('workModeLabel'),'Partnerarbeit');
+      await click('#whiteboardAddText');await evaluate("document.querySelector('.whiteboard-text-field').value='Tafel mit Ebenen';document.querySelector('.whiteboard-text-field').dispatchEvent(new Event('input'))");
+      await evaluate("document.getElementById('whiteboardEdit').open=true");
+      await click('#whiteboardBold');await click('#whiteboardItalic');await click('#whiteboardUnderline');await change('whiteboardTextFont','value','Georgia');await change('whiteboardTextAlign','value','center');await change('whiteboardFontSize','value','40');await click('[aria-label="Farbe Rot"]');
+      let text=await evaluate('whiteboard.snapshot().objects[0]');assert.equal(text.bold,true);assert.equal(text.italic,true);assert.equal(text.underline,true);assert.equal(text.align,'center');assert.equal(text.fontFamily,'Georgia');assert.equal(text.color,'#d84d65');
+      const width=text.width;await click('#whiteboardGrow');assert((await evaluate('whiteboard.snapshot().objects[0].width'))>width);
+      await evaluate("document.getElementById('whiteboardCanvas').scrollIntoView({block:'center'})");
+      await change('whiteboardTool','value','marker');
+      const board=await rect('#whiteboardCanvas');
+      await send('Input.dispatchMouseEvent',{type:'mousePressed',x:board.x+board.width*.5,y:board.y+board.height*.6,button:'left',clickCount:1});await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:board.x+board.width*.7,y:board.y+board.height*.65,button:'left',buttons:1});await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:board.x+board.width*.7,y:board.y+board.height*.65,button:'left',clickCount:1});
+      assert.equal(await evaluate("whiteboard.snapshot().objects.find(o=>o.type==='stroke').brush"),'marker');
+      await change('whiteboardObjects','value','1');await change('whiteboardWidth','value','12');assert.equal(await evaluate('whiteboard.snapshot().objects[1].width'),12);await click('#whiteboardGrow');
+      await change('whiteboardTool','value','chalk');
+      const point=async(type,x,y)=>evaluate(`document.getElementById('whiteboardCanvas').dispatchEvent(new PointerEvent('${type}',{clientX:${board.x}+${board.width}*${x},clientY:${board.y}+${board.height}*${y},button:0,pointerId:9,bubbles:true}))`);
+      await evaluate("document.getElementById('whiteboardCanvas').setPointerCapture=()=>{}");await point('pointerdown',.5,.8);await point('pointermove',.7,.8);await point('pointerup',.7,.8);
+      assert.equal(await evaluate('whiteboard.snapshot().objects[2].brush'),'chalk');
+      // Insert a two-page PDF with valid byte offsets.
+      const streams=['q 1 0 0 rg 30 40 100 50 re f Q BT /F1 24 Tf 30 150 Td (PDF Seite 1) Tj ET','q 0 0 1 rg 30 40 100 50 re f Q BT /F1 24 Tf 30 150 Td (PDF Seite 2) Tj ET'];
+      const pdfObjects=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 200] /Resources << /Font << /F1 7 0 R >> >> /Contents 4 0 R >>','<< /Length '+streams[0].length+' >>\nstream\n'+streams[0]+'\nendstream','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 200] /Resources << /Font << /F1 7 0 R >> >> /Contents 6 0 R >>','<< /Length '+streams[1].length+' >>\nstream\n'+streams[1]+'\nendstream','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'];
+      let pdf='%PDF-1.4\n',offsets=[0];for(let i=0;i<pdfObjects.length;i++){offsets.push(Buffer.byteLength(pdf));pdf+=(i+1)+' 0 obj\n'+pdfObjects[i]+'\nendobj\n';}const xref=Buffer.byteLength(pdf);pdf+='xref\n0 8\n0000000000 65535 f \n'+offsets.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')+'trailer\n<< /Size 8 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
+      const pdfPath=path.join(profile,'board.pdf');fs.writeFileSync(pdfPath,pdf);
+      const doc=await send('DOM.getDocument'),input=await send('DOM.querySelector',{nodeId:doc.root.nodeId,selector:'#whiteboardPdf'});await send('DOM.setFileInputFiles',{nodeId:input.nodeId,files:[pdfPath]});
+      for(let i=0;i<60&&(await evaluate("document.getElementById('pdfInsert').disabled"));i++)await sleep(150);
+      assert.equal(await evaluate("document.getElementById('pdfInsert').disabled"),false,await label('pdfStatus'));
+      assert.equal(await label('pdfPageCount'),'von 2');assert((await evaluate("document.getElementById('pdfPreview').getContext('2d').getImageData(100,260,1,1).data[0]"))>200);
+      await click('#pdfInsert');await change('pdfPage','value','2');for(let i=0;i<30&&(await evaluate("document.getElementById('pdfInsert').disabled"));i++)await sleep(100);await click('#pdfInsert');await click('#pdfClose');
+      assert.equal(await evaluate("whiteboard.snapshot().objects.filter(o=>o.sourceName).length"),2);
+      const badPdfPath=path.join(profile,'broken.pdf');fs.writeFileSync(badPdfPath,'Not a PDF');const badDoc=await send('DOM.getDocument'),badInput=await send('DOM.querySelector',{nodeId:badDoc.root.nodeId,selector:'#whiteboardPdf'});await send('DOM.setFileInputFiles',{nodeId:badInput.nodeId,files:[badPdfPath]});
+      for(let i=0;i<30&&!(await label('pdfStatus')).includes('nicht geöffnet');i++)await sleep(100);assert.match(await label('pdfStatus'),/nicht geöffnet/);assert.equal(await evaluate('whiteboard.snapshot().objects.length'),5);await click('#pdfClose');
+      await change('whiteboardObjects','value','4');await click('#whiteboardBack');assert.match(await evaluate('whiteboard.snapshot().objects[0].sourceName'),/Seite 2/);await click('#whiteboardFront');assert.match(await evaluate('whiteboard.snapshot().objects.at(-1).sourceName'),/Seite 2/);
+      await change('whiteboardObjects','value','0');await click('#whiteboardFront');assert.equal(await evaluate('whiteboard.snapshot().objects.at(-1).type'),'text');assert.equal(await evaluate("Number(document.querySelector('.whiteboard-text-box').style.zIndex)"),10);
+      const snapshot=await evaluate('classroomView.snapshot()');await click('#saveView');fs.writeFileSync(path.join(__dirname,'board-plus-test.html'),await evaluate('classroomView.exportHtml()'));
+      await send('Page.navigate',{url:pathToFileURL(path.join(__dirname,'board-plus-test.html')).href});await sleep(900);assert.deepEqual(await evaluate('whiteboard.snapshot()'),snapshot.whiteboard);assert.equal(await label('swapFocus'),'Spielwelt im Mittelpunkt');
+      await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
+      const localDoc=await send('DOM.getDocument'),localInput=await send('DOM.querySelector',{nodeId:localDoc.root.nodeId,selector:'#whiteboardPdf'});await send('DOM.setFileInputFiles',{nodeId:localInput.nodeId,files:[pdfPath]});
+      for(let i=0;i<60&&(await evaluate("document.getElementById('pdfInsert').disabled"));i++)await sleep(100);
+      assert.equal(await evaluate("document.getElementById('pdfInsert').disabled"),false,'PDF import from exported standalone HTML must work offline');await click('#pdfClose');
+      await send('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
+      await evaluate('window.scrollTo(0,document.body.scrollHeight)');const swap=await rect('#swapFocus');assert(swap.y>=0&&swap.y<250);
+      await send('Input.dispatchMouseEvent',{type:'mousePressed',x:swap.x+swap.width/2,y:swap.y+swap.height/2,button:'left',clickCount:1});await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:swap.x+swap.width/2,y:swap.y+swap.height/2,button:'left',clickCount:1});
+      assert.equal(await evaluate('window.scrollY'),0);assert.equal(await label('swapFocus'),'Tafel im Mittelpunkt');assert((await rect('[data-board=mainScreen]')).y<(await rect('#whiteboardModule')).y);
+      await click('#swapFocus');await evaluate('window.scrollTo(0,0)');await shot('board-plus');
+      await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});await sleep(250);await click('#swapFocus');await click('#swapFocus');
+      assert((await evaluate('document.documentElement.scrollWidth'))<=390);assert.equal(await evaluate('window.scrollY'),0);await shot('board-plus-mobile');
+      assert.deepEqual(errors,[]);console.log('0.5.3: Fokuswechsel ohne Zeitpause, klickbare Arbeitsformen, Textformatierung, Pinsel, Objektgröße/Ebenen, lokales mehrseitiges PDF und HTML-Restore geprüft.');return;
+    }
     if(process.env.TIME_TASK_ONLY) {
       await evaluate("window.testClock=Date.now();Date.now=()=>testClock");
       assert.equal(await label('workModeLabel'),'Partnerarbeit');
@@ -180,7 +233,7 @@ async function verify() {
       assert.deepEqual(errors,[]);console.log('Bibliothek: mehrere Ansichten, direktes Öffnen mit Tafel/Layout/Timer, Rückgängig, Umbenennen/Ersetzen/Löschen, Speicherfehler, Neustart und Altdatenübernahme geprüft.');return;
     }
     if(process.env.VERSION5_ONLY) {
-      assert.equal(await evaluate("document.title"),'KlassenAmpel 0.5.2');
+      assert.equal(await evaluate("document.title"),'KlassenAmpel 0.5.3');
       assert.equal(await evaluate("document.querySelectorAll('[data-board]').length"),5);
       assert(await evaluate("document.querySelector('[data-board=mainScreen]').contains(document.getElementById('roundSettings'))"));
       assert(await evaluate("document.querySelector('[data-board=mainScreen]').contains(document.querySelector('.discovery'))"));
@@ -415,6 +468,8 @@ async function verify() {
       await send('Emulation.setDeviceMetricsOverride',{width:360,height:800,deviceScaleFactor:1,mobile:true});
       await step(.1);
       await sleep(180);
+    for(let resizeWait=0;resizeWait<15&&(await evaluate('document.documentElement.scrollWidth'))>360;resizeWait++)await sleep(100);
+    if((await evaluate('document.documentElement.scrollWidth'))>360)console.log(await evaluate("JSON.stringify([...document.querySelectorAll('body *')].map(el=>{const r=el.getBoundingClientRect();return {tag:el.tagName,id:el.id,cls:el.className,width:r.width,right:r.right}}).filter(r=>r.right>400).slice(0,25))"));
     assert.equal(await evaluate('document.documentElement.scrollWidth'),360);
       await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
       await step(8);

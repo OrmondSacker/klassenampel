@@ -339,3 +339,23 @@ details.movable-module > summary { padding-left: 30px; padding-right: 24px; min-
 
 .free-layout > footer {position:absolute;top:100%;left:12px;right:12px;margin:0;padding-bottom:12px;}
 #countdownStart {width:100%;margin:0 0 8px;}
+
+.masthead {position:sticky;top:0;padding:10px 0;background:#152b3ef2;backdrop-filter:blur(12px);}
+#whiteboardEdit {margin:12px 0;}
+#whiteboardTextControls {display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.whiteboard-object-layer {position:absolute;pointer-events:auto;touch-action:none;}
+.whiteboard-object-layer.selected {outline:2px dashed #258f9b;outline-offset:3px;}
+#pdfDialog {width:min(740px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:#192c42;color:#f0f7fc;border:1px solid #64879b;border-radius:16px;}
+#pdfDialog::backdrop {background:#06121cb0;}
+#pdfPage {width:75px;padding:9px;font:inherit;}
+#pdfPreview {display:block;width:100%;height:auto;margin:12px auto;background:#fff;}
+#whiteboardObjects {max-width:100%;}
+.work-mode-badge {cursor:pointer;}
+.projector .masthead,.screensaver .masthead {backdrop-filter:none;}
+
+.whiteboard-palette {display:inline-flex;gap:4px;flex-wrap:wrap;}
+.whiteboard-palette button {background:var(--swatch);width:26px;min-height:28px;height:28px;padding:0;border:2px solid #a5bbc9;}
+
+#whiteboardModule:not(.text-selected) #whiteboardFontSize,#whiteboardModule:not(.text-selected) label[for=whiteboardFontSize] {display:none;}
+
+@media(max-width:575px){.masthead .actions{gap:6px;}.masthead .actions button{padding:7px 9px;font-size:.85rem;}#swapFocus{font-size:0;}#swapFocus::after{content:attr(data-short);font-size:.85rem;}}

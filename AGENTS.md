@@ -33,6 +33,8 @@ Diese Datei liegt seit der Zusammenführung am 26. November 2026 an der Reposito
 
 24. Version 0.5.2 ergänzt ±1 Minute ohne Neustart/Pause, Zeitvorgaben, abschaltbare visuelle Restzeit, sichtbare Arbeitsform und einen optionalen aufklappbaren Zusatzauftrag „Fertig? Dann …“. Diese Elemente innerhalb der bestehenden Aufgabe/Uhr halten und in allen Speicherwegen berücksichtigen.
 
+25. Version 0.5.3: Direkter Tausch von Tafel/Spielwelt in der stets erreichbaren Kopfzeile, ohne Einstellungen und ohne Zeitpause. Arbeitsform per Klick wechseln. Textformatierung, Pinsel, nachträgliche Objektgrößen und echte Ebenen für Text/Bilder/Striche erhalten. PDF-Seiten lokal einfügen; PDF.js samt Lizenz für offline nutzbare Einzeldateien einbetten.
+
 Neue eigenständige Module mit einer stabilen data-board-Kennung für die allgemeine Modulbedienung registrieren. Der frei positionierte Hauptscreen bleibt auf der Hintergrundebene, damit überlagerte Module beim Verschieben erreichbar bleiben.
 
 ## Gestaltung und Nutzerpräferenzen
