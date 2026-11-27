@@ -10,7 +10,7 @@ Der am 27.11.2026 bestätigte Entwurf ist lokal implementiert: fünf fachliche A
 
 Version-1-Anordnungen aus 0.4 werden auf die unterstützten fünf Gruppen migriert; Einzelpositionen der bisherigen Status- und Einstellungsfelder entfallen. Funktionen und Spielstände bleiben erhalten. VERSION5_ONLY, die betroffenen fachlichen Zusatzprüfungen und der vollständige bestehende Edge-Lauf waren am 27.11.2026 erfolgreich.
 
-Weiterhin offen: reale Geräteabnahme, Verhalten sehr großer Tafel-Fotosammlungen auf Mobilgeräten und ein gesondert beauftragtes Deployment. Unterschiedliche Farbvoreinstellungen und eine interaktive Layoutvorschau vor dem Anwenden sind mögliche spätere Ideen. Mathematisch lückenlose Packung ist kein zugesagtes Ziel.
+Am 27.11.2026 abgeschlossen: Nutzer-Praxistest ohne gemeldete Auffälligkeiten und genehmigte Veröffentlichung auf GitHub Pages mit erfolgreichem Build, Dateivergleich und Live-Browserprüfung. Weiterhin offen: dokumentierte Geräte-/Browserangaben und Verhalten sehr großer Tafel-Fotosammlungen auf Mobilgeräten. Unterschiedliche Farbvoreinstellungen und eine interaktive Layoutvorschau vor dem Anwenden sind mögliche spätere Ideen. Mathematisch lückenlose Packung ist kein zugesagtes Ziel.
 
 ### Historischer Zwischenstand 0.4
 

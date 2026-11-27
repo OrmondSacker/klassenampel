@@ -143,7 +143,7 @@ Das im Gespräch benannte Repository ist [OrmondSacker/klassenampel](https://git
 4. Bei Veröffentlichung aus einem Branch unter Settings → Pages den vorgesehenen Branch und Ordner prüfen. Historisch wurden `main` und `/ (root)` verwendet.
 5. Die Veröffentlichung unter Actions kontrollieren und danach die tatsächliche HTTPS-Seite prüfen.
 
-Auf dem am 26.11.2026 geprüften GitHub-main liegt Commit 4fc5bbc vom 15.11.2026 mit einer älteren index.html. Der aktuelle lokale Stand ist dort noch nicht enthalten. Die Pages-Konfiguration und der tatsächlich ausgelieferte Stand sind ungeprüft. Die offizielle [GitHub-Pages-Anleitung](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site) beschreibt die Veröffentlichung aus einem Branch.
+Am 27.11.2026 wurde Version 0.5.0 mit Genehmigung des Nutzers auf main veröffentlicht. Der GitHub-Pages-Build war erfolgreich; die HTTPS-Seite liefert die geprüfte HTML bytegenau aus. Der Browser-Prüflauf VERSION5_ONLY war zusätzlich direkt auf der Live-Seite erfolgreich. Die offizielle [GitHub-Pages-Anleitung](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site) beschreibt die Veröffentlichung aus einem Branch.
 
 ## Datenschutz und Einsatz im Unterricht
 

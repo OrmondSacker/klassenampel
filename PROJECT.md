@@ -4,6 +4,8 @@ Stand ist der 27. November 2026. Grundlage sind der Gesprächsverlauf, die lokal
 
 ## Version 0.5.0 – aktuelle Implementierung
 
+Veröffentlichung am 27.11.2026 vom Nutzer ausdrücklich genehmigt und erfolgreich durchgeführt: main wurde über die verbundene GitHub-Schnittstelle auf den exakt lokal getesteten Dateibaum aktualisiert. Der Pages-Build für Commit 9f3f3ee86e8cd8666a0ac38eb0ae10aac43ef21b war erfolgreich (Actions-Lauf 45964080959). https://ormondsacker.github.io/klassenampel/ antwortet mit HTTP 200 und dem Titel KlassenAmpel 0.5.0. Die ausgelieferte HTML stimmt bytegenau mit der getesteten Datei überein (Git-Blob 92e6e7060c75e64c501de71992c148cc6ee8255f). VERSION5_ONLY war direkt auf der Live-Seite erfolgreich. Der Nutzer meldete zuvor nach Durchführung des Praxistests keine aufgefallenen Probleme; konkrete Geräte- und Browserangaben wurden nicht genannt.
+
 Nachtrag: Die Bildschirmschoner-Steuerung liegt innerhalb „Spielwelt wählen“ und erscheint ausschließlich bei ausgewähltem Neutral-Modus. Der separate Menüpunkt wurde entfernt. Start wechselt nicht mehr selbstständig aus einer anderen Welt zu Neutral. Der gezielte SCREENSAVER_ONLY-Lauf bestätigt die bedingte Anzeige, Animation, reduzierte Bewegung, Rückwege und HTML-Wiederherstellung.
 
 Am 27.11.2026 auf Nutzerauftrag umgesetzt. Die Oberfläche trägt 0.5.0; der vollständige Ansichtssnapshot ergänzt appVersion. Die angekündigte Vorabbezeichnung 0.5.0-dev.1 wird nicht verwendet.
