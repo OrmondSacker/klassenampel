@@ -4,6 +4,10 @@ Stand ist der 27. November 2026. Diese Roadmap wurde nach der Bestandsaufnahme i
 
 ## Zuletzt umgesetzte Nutzeranforderungen
 
+### Version 0.5.1 – gespeicherte Inhalte wieder öffnen
+
+Die benannte lokale Ansichtsbibliothek mit Öffnen, Öffnen-Rückgängig, Umbenennen, Ersetzen, Löschen und Übernahme bisheriger Speicherungen ist umgesetzt und geprüft. Cloud-Synchronisierung und die Übertragung einer kompletten Sammlung sind weiterhin keine implementierten Funktionen.
+
 ### Version 0.5.0 umgesetzt
 
 Der am 27.11.2026 bestätigte Entwurf ist lokal implementiert: fünf fachliche Arbeitsmodule, zentrales Menü mit Mehrfachauswahl, fest gruppierte Spielanzeigen und Rundensteuerung, ruhige Menübedienung, semantische automatische Anordnung, bewusste Innenplatzierung, drei Layoutvorlagen, Fixierung, Layout-Rückgängig und zentrale Farbe/Transparenz. Die endgültig gewünschte Versionsnummer 0.5.0 ersetzt den früheren Vorschlag 0.5.0-dev.1.

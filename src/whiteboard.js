@@ -245,6 +245,8 @@
   };
   let saved=window.initialWhiteboardState;
   if(!saved)try{saved=JSON.parse(localStorage.getItem('klassenampel-whiteboard')||'null');}catch{}
+  function restore(saved){
+    objects=[];selected=null;gesture=null;undo.length=0;images.clear();
   if(saved?.version===1&&Array.isArray(saved.objects)){
     for(const obj of saved.objects){
       if(obj.type==='stroke'&&Array.isArray(obj.points)&&Number.isFinite(obj.width)&&/^#[0-9a-f]{6}$/i.test(obj.color)){
@@ -257,8 +259,11 @@
       }
     }
   }
+    draw();
+  }
+  restore(saved);
   window.whiteboard={
-    snapshot,
+    restore:state=>{restore(state);persist();},snapshot,
     prepareExport:clone=>clone.querySelector('#whiteboardTextLayer')?.replaceChildren()
   };
   new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['style']});

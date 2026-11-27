@@ -322,3 +322,5 @@ details.movable-module > summary { padding-left: 30px; padding-right: 24px; min-
 .projector .side {display:contents;}
 .projector .side > [data-board=microphone] {display:none;}
 .projector #moduleDock {grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+
+#viewName,#savedViews {display:block;width:100%;margin:8px 0 12px;padding:9px;border:1px solid #64879b;border-radius:8px;background:#102337;color:#f0f7fc;font:inherit;}

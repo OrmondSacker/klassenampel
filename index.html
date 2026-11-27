@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.5.0</title><style>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.5.1</title><style>
 :root {
   color-scheme: dark;
   font: 16px/1.45 "Geist", "Segoe UI", system-ui, sans-serif;
@@ -323,8 +323,10 @@ details.movable-module > summary { padding-left: 30px; padding-right: 24px; min-
 .projector .side {display:contents;}
 .projector .side > [data-board=microphone] {display:none;}
 .projector #moduleDock {grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+
+#viewName,#savedViews {display:block;width:100%;margin:8px 0 12px;padding:9px;border:1px solid #64879b;border-radius:8px;background:#102337;color:#f0f7fc;font:inherit;}
 </style></head><body><main>
-<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.5.0</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
+<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.5.1</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
 <section id="workspaceMenu" class="workspace-menu" hidden aria-label="Module und Einstellungen"><div class="menu-heading"><strong>Dein Arbeitsplatz</strong><button id="menuClose" aria-label="Menü schließen">×</button></div><div class="menu-grid"><section><h2>Anzeigen</h2><div id="moduleChoices"></div><div class="actions"><button id="autoArrange">Automatisch anordnen</button><button id="layoutUndo" disabled>Anordnung zurück</button></div><label for="layoutPreset">Anordnung</label><select id="layoutPreset"><option value="world">Spielwelt im Mittelpunkt</option><option value="task">Aufgabe & Uhr</option><option value="board">Tafel im Mittelpunkt</option></select><details class="panel" data-setting="modules" id="details-modules">
         <summary>Anzeige im Spielmodul</summary>
         <div class="row" hidden><label for="showTask">Aufgabenbox anzeigen</label><input id="showTask" type="checkbox" checked></div>
@@ -400,11 +402,16 @@ details.movable-module > summary { padding-left: 30px; padding-right: 24px; min-
         <p id="previewStatus" class="hint" aria-live="polite">Die Vorschau verändert den Punktestand nicht.</p>
       </details><details id="appearanceSettings"><summary>Modul gestalten</summary><label for="appearanceTarget">Modul</label><select id="appearanceTarget"></select><label for="moduleColor">Akzentfarbe</label><input id="moduleColor" type="color" value="#7196ad"><label for="moduleOpacity">Hintergrundtransparenz</label><input id="moduleOpacity" type="range" min="0" max="100" value="0"><label><input id="moduleLocked" type="checkbox"> Position fixieren</label></details></section><section><h2>Speichern & Teilen</h2><details class="panel view-settings" data-setting="sharing" id="details-sharing">
         <summary>Ansicht speichern und teilen</summary>
+        <label for="viewName">Name der Ansicht</label><input id="viewName" type="text" maxlength="80" placeholder="Zum Beispiel: Mathematik – Stillarbeit">
         <div class="actions">
-          <button id="saveView">Ansicht speichern</button>
+          <button id="saveView">Als neue Ansicht speichern</button>
           <button id="exportView">Ansicht als HTML exportieren</button>
           <button id="shareView">Online-Link erstellen</button>
         </div>
+        <label for="savedViews">Gespeicherte Ansichten</label><select id="savedViews" aria-label="Gespeicherte Ansicht auswählen"></select>
+        <div class="actions"><button id="loadView" disabled>Ansicht öffnen</button><button id="undoLoadView" disabled>Öffnen rückgängig</button></div>
+        <details id="savedViewActions"><summary>Gespeicherte Ansicht verwalten</summary><div class="actions"><button id="replaceView" disabled>Mit aktuellem Inhalt ersetzen</button><button id="renameView" disabled>Umbenennen</button><button id="deleteView" disabled>Löschen</button></div></details>
+        <p class="hint">Die Sammlung bleibt in diesem Browser auf diesem Gerät. HTML-Export und Online-Link übertragen jeweils die aktuelle Ansicht.</p>
         <p id="viewStatus" class="hint" aria-live="polite"></p>
         <input id="shareLink" type="url" readonly hidden aria-label="Link zur eingerichteten Ansicht">
         <p class="hint">HTML auf einem anderen Gerät öffnen oder als index.html auf GitHub Pages veröffentlichen. Online-Links enthalten die Einrichtung beim Erstellen.</p>
@@ -1783,6 +1790,7 @@ function createWorldRenderer(canvas) {
       if(Number.isFinite(game.remaining)) state.remaining=clamp(game.remaining,0,3600);
       if(Number.isFinite(game.elapsed)) state.elapsed=Math.max(0,game.elapsed);
       if(Number.isFinite(game.green)) state.green=clamp(game.green,0,state.elapsed);
+      state.previewCount=null;$('unlockPreview').value='live';
       if(hasDiscoveries()&&Number.isInteger(game.previewCount)&&game.previewCount>=0&&game.previewCount<=12) {
         state.previewCount=game.previewCount;
         $('unlockPreview').value=String(game.previewCount);
@@ -2037,7 +2045,7 @@ function createWorldRenderer(canvas) {
   function snapshot() {
     countdown();
     return {
-      version:1,appVersion:'0.5.0',task:task.value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,
+      version:1,appVersion:'0.5.1',task:task.value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,
       game:window.klassenampel.snapshot(),
       controls:Object.fromEntries(controls.map(id=>[id,$(id).type==='checkbox'?$(id).checked:$(id).value])),
       projector:document.body.classList.contains('projector'),
@@ -2050,6 +2058,7 @@ function createWorldRenderer(canvas) {
   }
   function restore(config) {
     if(!config||config.version!==1) return;
+    stopAlarm();
     window.initialModuleLayout=config.moduleLayout??(config.board?.active?config.board:{version:1,items:{}});
     window.initialWhiteboardState=config.whiteboard??{version:1,objects:[]};
     if(typeof config.task==='string') task.value=config.task.slice(0,2000);
@@ -2084,12 +2093,68 @@ function createWorldRenderer(canvas) {
     if(config.detailsOpen&&typeof config.detailsOpen==='object') for(const el of document.querySelectorAll('details[id]')) {
       if(Object.hasOwn(config.detailsOpen,el.id)) el.open=config.detailsOpen[el.id]===true;
     }
-    visibility();countdown();
+    visibility();countdown();syncNeutralOptions();
+    window.moduleLayout?.restore(window.initialModuleLayout);
+    window.whiteboard?.restore(window.initialWhiteboardState);
   }
+  const libraryKey='klassenampel-view-library';
+  let library=[],undoOpen=null;
+  const validView=value=>value&&value.version===1&&typeof value.task==='string'&&value.controls&&typeof value.controls==='object';
+  function renderLibrary(selected=$('savedViews').value){
+    const list=$('savedViews');list.replaceChildren();
+    const empty=document.createElement('option');empty.value='';empty.textContent=library.length?'Ansicht auswählen …':'Noch keine gespeicherten Ansichten';list.append(empty);
+    for(const entry of library){const option=document.createElement('option');option.value=entry.id;option.textContent=entry.name;list.append(option);}
+    list.value=selected;
+    const disabled=!library.some(entry=>entry.id===list.value);
+    for(const id of ['loadView','replaceView','renameView','deleteView'])$(id).disabled=disabled;
+  }
+  function saveLibrary(next,selected,message){
+    try{localStorage.setItem(libraryKey,JSON.stringify({version:1,entries:next}));}
+    catch{notice('Speichern nicht möglich: Browserspeicher voll oder gesperrt. Bestehende Ansichten bleiben erhalten. Bitte HTML exportieren.');return false;}
+    library=next;renderLibrary(selected);notice(message);return true;
+  }
+  function viewName(){return $('viewName').value.trim().slice(0,80);}
+  function rememberCurrent(config){try{localStorage.setItem('klassenampel-view',JSON.stringify(config));}catch{}}
+  function selectedView(){return library.find(entry=>entry.id===$('savedViews').value);}
+  function initializeLibrary(){
+    try{
+      const saved=JSON.parse(localStorage.getItem(libraryKey)||'null');
+      if(saved?.version===1&&Array.isArray(saved.entries))library=saved.entries.filter(entry=>typeof entry?.id==='string'&&typeof entry.name==='string'&&validView(entry.config));
+      else if(!saved){
+        const legacy=JSON.parse(localStorage.getItem('klassenampel-view')||'null');
+        if(validView(legacy)){
+          const entry={id:'previous-view',name:'Bisher gespeicherte Ansicht',config:legacy};
+          if(saveLibrary([entry],entry.id,'Die bisher gespeicherte Ansicht ist jetzt in deiner Sammlung verfügbar.'))library=[entry];
+        }
+      }
+    }catch{notice('Die Sammlung konnte nicht gelesen werden. Vorhandene Daten wurden nicht überschrieben.');}
+    renderLibrary();
+  }
+  $('savedViews').onchange=()=>{renderLibrary();const entry=selectedView();if(entry)$('viewName').value=entry.name;};
   $('saveView').onclick=()=>{
-    try{localStorage.setItem('klassenampel-view',JSON.stringify(snapshot()));notice('Die komplette Einrichtung ist in diesem Browser gespeichert.');}
-    catch{notice('Speicherung gesperrt. Bitte die Ansicht als HTML exportieren.');}
+    const name=viewName()||'Ansicht '+(library.length+1),config=snapshot();
+    const entry={id:crypto.randomUUID?.()??Date.now().toString(36)+Math.random().toString(36).slice(2),name,config};
+    if(saveLibrary([...library,entry],entry.id,'„'+name+'“ gespeichert. Über „Ansicht öffnen“ jederzeit wieder aufrufen.')){$('viewName').value=name;rememberCurrent(config);}
   };
+  $('loadView').onclick=()=>{
+    const entry=selectedView();if(!entry)return;
+    undoOpen=structuredClone(snapshot());restore(structuredClone(entry.config));rememberCurrent(snapshot());
+    $('undoLoadView').disabled=false;notice('„'+entry.name+'“ geöffnet. Spielrunde und Countdown sind pausiert.');
+  };
+  $('undoLoadView').onclick=()=>{if(!undoOpen)return;restore(undoOpen);undoOpen=null;$('undoLoadView').disabled=true;rememberCurrent(snapshot());notice('Die vorherige Arbeitsansicht wurde wiederhergestellt.');};
+  $('replaceView').onclick=()=>{
+    const entry=selectedView();if(!entry||!confirm('„'+entry.name+'“ mit der aktuellen Ansicht ersetzen?'))return;
+    const config=snapshot();if(saveLibrary(library.map(item=>item.id===entry.id?{...item,config}:item),entry.id,'Gespeicherte Ansicht aktualisiert.'))rememberCurrent(config);
+  };
+  $('renameView').onclick=()=>{
+    const entry=selectedView(),name=viewName();if(!entry)return;if(!name){notice('Bitte oben einen Namen eingeben.');return;}
+    saveLibrary(library.map(item=>item.id===entry.id?{...item,name}:item),entry.id,'Ansicht umbenannt.');
+  };
+  $('deleteView').onclick=()=>{
+    const entry=selectedView();if(!entry||!confirm('„'+entry.name+'“ aus der Sammlung löschen?'))return;
+    saveLibrary(library.filter(item=>item.id!==entry.id),'','Ansicht aus der Sammlung gelöscht. Die aktuelle Arbeitsfläche bleibt erhalten.');
+  };
+  initializeLibrary();
   function exportHtml() {
     const clone=document.documentElement.cloneNode(true);
     window.moduleLayout?.prepareExport(clone);
@@ -2098,6 +2163,8 @@ function createWorldRenderer(canvas) {
     const data=document.createElement('script');data.id='viewConfig';data.type='application/json';
     data.textContent=JSON.stringify(snapshot()).replaceAll('<','\\u003c');
     clone.querySelector('head').append(data);
+    clone.querySelector('#savedViews').replaceChildren();clone.querySelector('#viewName').value='';
+    for(const id of ['loadView','replaceView','renameView','deleteView','undoLoadView'])clone.querySelector('#'+id).disabled=true;
     clone.querySelector('#shareLink').value='';clone.querySelector('#shareLink').hidden=true;
     return '<!doctype html>\n'+clone.outerHTML;
   }
@@ -2474,7 +2541,7 @@ function createWorldRenderer(canvas) {
   restoring=false;
   load(saved??{version:2,visible:{whiteboard:false}});syncChoices();selectAppearance('mainScreen');
   if(saved?.version===1)$('layoutNotice').textContent='Ansicht aus 0.4 übernommen. Statusanzeigen und Einstellungen sind jetzt fest gruppiert.';
-  window.moduleLayout={snapshot,prepareExport,isFree:id=>Boolean(items[id==='taskModule'?'task':id==='countdownModule'?'countdown':id]),reset,autoArrange};
+  window.moduleLayout={restore:saved=>{load(saved);history.length=0;$('layoutUndo').disabled=true;syncChoices();selectAppearance($('appearanceTarget').value);persist();},snapshot,prepareExport,isFree:id=>Boolean(items[id==='taskModule'?'task':id==='countdownModule'?'countdown':id]),reset,autoArrange};
   $('resetLayout').addEventListener('click',()=>{reset();syncChoices();});$('autoArrange').onclick=()=>autoArrange();
   let timer;window.addEventListener('resize',()=>{refresh();clearTimeout(timer);if(automatic)timer=setTimeout(()=>autoArrange(false),80);});
   // Settings are in a fixed menu; opening them must never reorder the classroom surface.
@@ -2739,6 +2806,8 @@ function createWorldRenderer(canvas) {
   };
   let saved=window.initialWhiteboardState;
   if(!saved)try{saved=JSON.parse(localStorage.getItem('klassenampel-whiteboard')||'null');}catch{}
+  function restore(saved){
+    objects=[];selected=null;gesture=null;undo.length=0;images.clear();
   if(saved?.version===1&&Array.isArray(saved.objects)){
     for(const obj of saved.objects){
       if(obj.type==='stroke'&&Array.isArray(obj.points)&&Number.isFinite(obj.width)&&/^#[0-9a-f]{6}$/i.test(obj.color)){
@@ -2751,8 +2820,11 @@ function createWorldRenderer(canvas) {
       }
     }
   }
+    draw();
+  }
+  restore(saved);
   window.whiteboard={
-    snapshot,
+    restore:state=>{restore(state);persist();},snapshot,
     prepareExport:clone=>clone.querySelector('#whiteboardTextLayer')?.replaceChildren()
   };
   new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['style']});

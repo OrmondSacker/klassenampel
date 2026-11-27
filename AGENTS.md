@@ -29,6 +29,8 @@ Diese Datei liegt seit der Zusammenführung am 26. November 2026 an der Reposito
 21. Tafelobjekte einzeln löschbar und Änderungen rückgängig halten. Eingefügte Fotos unabhängig von der Tafel proportional skalierbar halten. Hintergrundtransparenz je Modul und Transparenz je Tafelobjekt einschließlich Speicherung und Export erhalten.
 22. Der Nutzer hat Version 0.5.0 beauftragt. Die zuvor vorgeschlagene Bezeichnung 0.5.0-dev.1 ist damit ersetzt. Neue Versionsnummer sichtbar und im Ansichtsexport führen; alte 0.4-Ansichten auf die fünf Gruppen migrieren. Farben, Fixierung, Sichtbarkeit und Layoutvorlagen gehören zur gespeicherten Ansicht.
 
+23. Benannte Ansichten direkt auf der Seite speichern, öffnen und verwalten können. Vorhandene einzelne Speicherung übernehmen; Tafel-Fotos, Layout und Einstellungen erhalten. Beim Öffnen Zeiten pausieren und die vorherige Arbeitsfläche über Rückgängig erreichbar halten. Die lokale Sammlung nicht ungefragt in HTML-Exporte oder Links aufnehmen.
+
 Neue eigenständige Module mit einer stabilen data-board-Kennung für die allgemeine Modulbedienung registrieren. Der frei positionierte Hauptscreen bleibt auf der Hintergrundebene, damit überlagerte Module beim Verschieben erreichbar bleiben.
 
 ## Gestaltung und Nutzerpräferenzen

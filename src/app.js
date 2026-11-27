@@ -431,6 +431,7 @@
       if(Number.isFinite(game.remaining)) state.remaining=clamp(game.remaining,0,3600);
       if(Number.isFinite(game.elapsed)) state.elapsed=Math.max(0,game.elapsed);
       if(Number.isFinite(game.green)) state.green=clamp(game.green,0,state.elapsed);
+      state.previewCount=null;$('unlockPreview').value='live';
       if(hasDiscoveries()&&Number.isInteger(game.previewCount)&&game.previewCount>=0&&game.previewCount<=12) {
         state.previewCount=game.previewCount;
         $('unlockPreview').value=String(game.previewCount);

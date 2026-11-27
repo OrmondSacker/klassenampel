@@ -105,8 +105,41 @@ async function verify() {
     assert.equal(await value('penDelay'),'5');
     assert.equal(await value('penStrength'),'medium');
     assert.equal(await value('penCooldown'),'20');
+    if(process.env.LIBRARY_ONLY) {
+      await click('[data-module-choice=whiteboard]');await click('#whiteboardAddText');
+      await evaluate("document.querySelector('.whiteboard-text-field').value='Tafel A';document.querySelector('.whiteboard-text-field').dispatchEvent(new Event('input'));document.getElementById('taskText').value='Aufgabe A';document.getElementById('viewName').value='Mathematik'");
+      await evaluate("{const c=document.createElement('canvas');c.width=20;c.height=10;c.getContext('2d').fillRect(0,0,20,10);const saved=whiteboard.snapshot();saved.objects.push({type:'image',src:c.toDataURL(),x:400,y:200,width:200,height:100,opacity:.6});whiteboard.restore(saved);}");
+      await click('#autoArrange');await click('#saveView');
+      const first=await evaluate("document.getElementById('savedViews').value"),snapA=await evaluate('classroomView.snapshot()');
+      await evaluate("document.getElementById('taskText').value='Aufgabe B';document.querySelector('.whiteboard-text-field').value='Tafel B';document.querySelector('.whiteboard-text-field').dispatchEvent(new Event('input'));document.getElementById('viewName').value='Deutsch'");
+      await change('countdownMinutes','value','2');await click('[data-world=space]');await click('#saveView');
+      const second=await value('savedViews');assert.notEqual(first,second);
+      assert.equal(await evaluate("document.getElementById('savedViews').options.length"),3);
+      await change('savedViews','value',first);await click('#countdownStart');await click('#loadView');
+      assert.equal(await value('taskText'),'Aufgabe A');assert.equal(await evaluate("whiteboard.snapshot().objects[0].text"),'Tafel A');assert.equal(await label('countdownDisplay'),'05:00');
+      assert.deepEqual(await evaluate('whiteboard.snapshot()'),snapA.whiteboard);
+      assert.equal(await evaluate('klassenampel.snapshot().world'),'aquarium');assert.deepEqual(await evaluate('moduleLayout.snapshot()'),snapA.moduleLayout);
+      await click('#undoLoadView');assert.equal(await value('taskText'),'Aufgabe B');assert.equal(await evaluate('klassenampel.snapshot().world'),'space');
+      await click('#loadView');await evaluate("document.getElementById('viewName').value='Mathematik neu'");await click('#renameView');
+      assert.equal(await evaluate("document.getElementById('savedViews').selectedOptions[0].textContent"),'Mathematik neu');
+      await evaluate("document.getElementById('taskText').value='Aufgabe A ersetzt'");await click('#replaceView');
+      await change('savedViews','value',second);await click('#loadView');assert.equal(await value('taskText'),'Aufgabe B');
+      await change('savedViews','value',first);await click('#loadView');assert.equal(await value('taskText'),'Aufgabe A ersetzt');
+      // A failed write must not remove existing entries or report success.
+      await evaluate("window.originalStorageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='klassenampel-view-library')throw new DOMException('Full','QuotaExceededError');return originalStorageSet.call(this,key,value)}");
+      await click('#saveView');assert.match(await label('viewStatus'),/voll oder gesperrt/);assert.equal(await evaluate("document.getElementById('savedViews').options.length"),3);
+      await evaluate("Storage.prototype.setItem=originalStorageSet");
+      const html=await evaluate('classroomView.exportHtml()');assert(!html.includes('<option value="'+second+'"'));
+      fs.writeFileSync(path.join(__dirname,'library-test.html'),html);
+      await send('Page.reload');await sleep(600);assert.equal(await evaluate("document.getElementById('savedViews').options.length"),3);
+      await change('savedViews','value',second);await click('#deleteView');assert.equal(await value('taskText'),'Aufgabe A ersetzt');assert.equal(await evaluate("document.getElementById('savedViews').options.length"),2);
+      await click('#menuToggle');await evaluate("document.getElementById('details-sharing').open=true");await shot('saved-library');
+      await evaluate("localStorage.removeItem('klassenampel-view-library')");await send('Page.reload');await sleep(600);
+      assert.equal(await evaluate("document.getElementById('savedViews').options[1].textContent"),'Bisher gespeicherte Ansicht');
+      assert.deepEqual(errors,[]);console.log('Bibliothek: mehrere Ansichten, direktes Öffnen mit Tafel/Layout/Timer, Rückgängig, Umbenennen/Ersetzen/Löschen, Speicherfehler, Neustart und Altdatenübernahme geprüft.');return;
+    }
     if(process.env.VERSION5_ONLY) {
-      assert.equal(await evaluate("document.title"),'KlassenAmpel 0.5.0');
+      assert.equal(await evaluate("document.title"),'KlassenAmpel 0.5.1');
       assert.equal(await evaluate("document.querySelectorAll('[data-board]').length"),5);
       assert(await evaluate("document.querySelector('[data-board=mainScreen]').contains(document.getElementById('roundSettings'))"));
       assert(await evaluate("document.querySelector('[data-board=mainScreen]').contains(document.querySelector('.discovery'))"));

@@ -1,6 +1,6 @@
 # KlassenAmpel
 
-Version 0.5.0, Stand 27. November 2026. Die bisherige Version 0.4 wurde in fünf zusammengehörige Arbeitsmodule und ein zentrales Menü überführt.
+Version 0.5.1, Stand 27. November 2026. Die bisherige Version 0.4 wurde in fünf zusammengehörige Arbeitsmodule und ein zentrales Menü überführt.
 
 Die KlassenAmpel ist eine deutschsprachige Web-App für den Unterricht. Sie verbindet eine Mikrofon-Lautstärkeampel mit einer Spielrunde, gemeinsamem Fortschritt, Aufgabenfeld und unabhängigem Aufgaben-Countdown. Sie richtet sich an Grundschule und Berufskolleg und soll auf Unterrichtsrechnern, interaktiven Tafeln sowie mobilen Geräten nutzbar sein.
 
@@ -117,7 +117,7 @@ node tests/browser-check.cjs
 Remove-Item Env:ALARM_ONLY
 ```
 
-Weitere gezielte Modi sind `VERSION5_ONLY`, `DOCK_TEXT_ONLY`, `TEXT_INPUT_ONLY`, `MODULES_ONLY`, `LAVA_ONLY`, `SCREENSAVER_ONLY`, `PREVIEW_ONLY`, `WORLDS_ONLY`, `CITY_ONLY`, `BACKGROUND_ONLY` und `FONTS_ONLY`. Nur den gewünschten Schalter setzen und danach wieder entfernen. Das Skript beendet sich beim ersten zutreffenden Modus. Diese Schalter sind Teststeuerung und keine App-Konfiguration.
+Weitere gezielte Modi sind `LIBRARY_ONLY`, `VERSION5_ONLY`, `DOCK_TEXT_ONLY`, `TEXT_INPUT_ONLY`, `MODULES_ONLY`, `LAVA_ONLY`, `SCREENSAVER_ONLY`, `PREVIEW_ONLY`, `WORLDS_ONLY`, `CITY_ONLY`, `BACKGROUND_ONLY` und `FONTS_ONLY`. Nur den gewünschten Schalter setzen und danach wieder entfernen. Das Skript beendet sich beim ersten zutreffenden Modus. Diese Schalter sind Teststeuerung und keine App-Konfiguration.
 
 Der Gesamtlauf ohne Schalter ist historisch gewachsen. Am 26.11.2026 endete er einschließlich simuliertem Mikrofon mit Exitcode 0. Zusätzlich waren ALARM_ONLY, LAVA_ONLY, SCREENSAVER_ONLY, PREVIEW_ONLY, BACKGROUND_ONLY und FONTS_ONLY erfolgreich. Ein älterer Lauf war zuvor bei der simulierten Mikrofonfreigabe stehengeblieben. Die aktuellen Ergebnisse ersetzen keine Erprobung auf realer Unterrichtshardware.
 
@@ -127,7 +127,10 @@ Nach der Zusammenführung wurden der Gesamtlauf und alle acht Zusatzmodi einschl
 
 Unter „Ansicht speichern und teilen“ stehen drei Wege bereit.
 
-- „Ansicht speichern“ legt die Einrichtung im Browser ab.
+- Einen Namen eingeben und „Als neue Ansicht speichern“ wählen.
+- Unter „Gespeicherte Ansichten“ eine Ansicht auswählen und mit „Ansicht öffnen“ direkt wieder aufrufen. Aufgabe, Tafel einschließlich Fotos, Layout, Einstellungen und Spielstand werden übernommen; Spielrunde und Countdown pausieren dabei. „Öffnen rückgängig“ bringt die vorherige Arbeitsfläche zurück.
+- Unter „Gespeicherte Ansicht verwalten“ lassen sich Einträge umbenennen, ausdrücklich ersetzen oder löschen. Die bisherige einzelne Speicherung wird als „Bisher gespeicherte Ansicht“ übernommen.
+- Die Sammlung liegt ausschließlich in diesem Browser auf diesem Gerät. Export und Ansichtslink enthalten jeweils die aktuelle Ansicht, nicht die gesamte Sammlung.
 - „Ansicht als HTML exportieren“ erzeugt eine eigenständig nutzbare HTML-Datei mit Aufgabe, Layout, Einstellungen und Spielstand.
 - „Online-Link erstellen“ erzeugt auf einer HTTP-/HTTPS-Seite einen Link mit der Einrichtung im URL-Fragment.
 

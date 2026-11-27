@@ -2,7 +2,15 @@
 
 Stand ist der 27. November 2026. Grundlage sind der Gesprächsverlauf, die lokalen Quell- und Ausgabedateien und die unten dokumentierte erneute Bestandsaufnahme.
 
-## Version 0.5.0 – aktuelle Implementierung
+## Version 0.5.1 – Ansichtsbibliothek
+
+Implementiert: Mehrere benannte Ansichten direkt in „Ansicht speichern und teilen“ speichern und öffnen. Einträge können umbenannt, nach ausdrücklicher Bestätigung ersetzt und gelöscht werden. Die aktuelle Arbeitsfläche bleibt beim Löschen erhalten. Die letzte Öffnung kann rückgängig gemacht werden. Beim Öffnen werden Spielrunde und Countdown pausiert; ein noch laufender Countdown-Signalton wird gestoppt. Modul- und Tafeldaten werden über ihre bestehenden validierenden Restorewege zur Laufzeit übernommen, ohne Seitenneuladen. Die Freischaltvorschau wird beim Wechsel vollständig zurückgesetzt beziehungsweise wiederhergestellt.
+
+Speicherschlüssel: klassenampel-view-library, Format {version:1, entries:[{id,name,config}]}. Jeder Eintrag enthält einen vollständigen bestehenden Ansichtssnapshot. Der bisherige Schlüssel klassenampel-view bleibt für die zuletzt gespeicherte/geöffnete Ansicht erhalten und wird beim ersten Start ohne Sammlung als „Bisher gespeicherte Ansicht“ übernommen. Fehlgeschlagene Bibliotheksschreibvorgänge ändern die vorhandene Sammlung nicht und zeigen einen Exporthinweis. Sammlung und Namen werden nicht mit HTML oder Link exportiert; diese enthalten ausschließlich die aktuelle Ansicht. Die Sammlung ist geräte- und browserlokal, ohne Cloud-Synchronisierung.
+
+LIBRARY_ONLY bestätigt mehrere Einträge, direktes Öffnen mit Text und Foto/Transparenz, Layout, Welt und Countdown, Öffnen-Rückgängig, Umbenennen, Ersetzen, Löschen, Speicherfehler, Wiederanlauf, Export ohne Bibliotheksliste und Übernahme der bisherigen Speicherung. VERSION5_ONLY, MODULES_ONLY und der vollständige bestehende Edge-Prüflauf waren erfolgreich.
+
+## Version 0.5.0 – Grundlage der aktuellen Implementierung
 
 Veröffentlichung am 27.11.2026 vom Nutzer ausdrücklich genehmigt und erfolgreich durchgeführt: main wurde über die verbundene GitHub-Schnittstelle auf den exakt lokal getesteten Dateibaum aktualisiert. Der Pages-Build für Commit 9f3f3ee86e8cd8666a0ac38eb0ae10aac43ef21b war erfolgreich (Actions-Lauf 45964080959). https://ormondsacker.github.io/klassenampel/ antwortet mit HTTP 200 und dem Titel KlassenAmpel 0.5.0. Die ausgelieferte HTML stimmt bytegenau mit der getesteten Datei überein (Git-Blob 92e6e7060c75e64c501de71992c148cc6ee8255f). VERSION5_ONLY war direkt auf der Live-Seite erfolgreich. Der Nutzer meldete zuvor nach Durchführung des Praxistests keine aufgefallenen Probleme; konkrete Geräte- und Browserangaben wurden nicht genannt.
 

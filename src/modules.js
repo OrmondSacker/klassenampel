@@ -326,7 +326,7 @@
   restoring=false;
   load(saved??{version:2,visible:{whiteboard:false}});syncChoices();selectAppearance('mainScreen');
   if(saved?.version===1)$('layoutNotice').textContent='Ansicht aus 0.4 übernommen. Statusanzeigen und Einstellungen sind jetzt fest gruppiert.';
-  window.moduleLayout={snapshot,prepareExport,isFree:id=>Boolean(items[id==='taskModule'?'task':id==='countdownModule'?'countdown':id]),reset,autoArrange};
+  window.moduleLayout={restore:saved=>{load(saved);history.length=0;$('layoutUndo').disabled=true;syncChoices();selectAppearance($('appearanceTarget').value);persist();},snapshot,prepareExport,isFree:id=>Boolean(items[id==='taskModule'?'task':id==='countdownModule'?'countdown':id]),reset,autoArrange};
   $('resetLayout').addEventListener('click',()=>{reset();syncChoices();});$('autoArrange').onclick=()=>autoArrange();
   let timer;window.addEventListener('resize',()=>{refresh();clearTimeout(timer);if(automatic)timer=setTimeout(()=>autoArrange(false),80);});
   // Settings are in a fixed menu; opening them must never reorder the classroom surface.

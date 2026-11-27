@@ -239,7 +239,7 @@
   function snapshot() {
     countdown();
     return {
-      version:1,appVersion:'0.5.0',task:task.value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,
+      version:1,appVersion:'0.5.1',task:task.value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,
       game:window.klassenampel.snapshot(),
       controls:Object.fromEntries(controls.map(id=>[id,$(id).type==='checkbox'?$(id).checked:$(id).value])),
       projector:document.body.classList.contains('projector'),
@@ -252,6 +252,7 @@
   }
   function restore(config) {
     if(!config||config.version!==1) return;
+    stopAlarm();
     window.initialModuleLayout=config.moduleLayout??(config.board?.active?config.board:{version:1,items:{}});
     window.initialWhiteboardState=config.whiteboard??{version:1,objects:[]};
     if(typeof config.task==='string') task.value=config.task.slice(0,2000);
@@ -286,12 +287,68 @@
     if(config.detailsOpen&&typeof config.detailsOpen==='object') for(const el of document.querySelectorAll('details[id]')) {
       if(Object.hasOwn(config.detailsOpen,el.id)) el.open=config.detailsOpen[el.id]===true;
     }
-    visibility();countdown();
+    visibility();countdown();syncNeutralOptions();
+    window.moduleLayout?.restore(window.initialModuleLayout);
+    window.whiteboard?.restore(window.initialWhiteboardState);
   }
+  const libraryKey='klassenampel-view-library';
+  let library=[],undoOpen=null;
+  const validView=value=>value&&value.version===1&&typeof value.task==='string'&&value.controls&&typeof value.controls==='object';
+  function renderLibrary(selected=$('savedViews').value){
+    const list=$('savedViews');list.replaceChildren();
+    const empty=document.createElement('option');empty.value='';empty.textContent=library.length?'Ansicht auswählen …':'Noch keine gespeicherten Ansichten';list.append(empty);
+    for(const entry of library){const option=document.createElement('option');option.value=entry.id;option.textContent=entry.name;list.append(option);}
+    list.value=selected;
+    const disabled=!library.some(entry=>entry.id===list.value);
+    for(const id of ['loadView','replaceView','renameView','deleteView'])$(id).disabled=disabled;
+  }
+  function saveLibrary(next,selected,message){
+    try{localStorage.setItem(libraryKey,JSON.stringify({version:1,entries:next}));}
+    catch{notice('Speichern nicht möglich: Browserspeicher voll oder gesperrt. Bestehende Ansichten bleiben erhalten. Bitte HTML exportieren.');return false;}
+    library=next;renderLibrary(selected);notice(message);return true;
+  }
+  function viewName(){return $('viewName').value.trim().slice(0,80);}
+  function rememberCurrent(config){try{localStorage.setItem('klassenampel-view',JSON.stringify(config));}catch{}}
+  function selectedView(){return library.find(entry=>entry.id===$('savedViews').value);}
+  function initializeLibrary(){
+    try{
+      const saved=JSON.parse(localStorage.getItem(libraryKey)||'null');
+      if(saved?.version===1&&Array.isArray(saved.entries))library=saved.entries.filter(entry=>typeof entry?.id==='string'&&typeof entry.name==='string'&&validView(entry.config));
+      else if(!saved){
+        const legacy=JSON.parse(localStorage.getItem('klassenampel-view')||'null');
+        if(validView(legacy)){
+          const entry={id:'previous-view',name:'Bisher gespeicherte Ansicht',config:legacy};
+          if(saveLibrary([entry],entry.id,'Die bisher gespeicherte Ansicht ist jetzt in deiner Sammlung verfügbar.'))library=[entry];
+        }
+      }
+    }catch{notice('Die Sammlung konnte nicht gelesen werden. Vorhandene Daten wurden nicht überschrieben.');}
+    renderLibrary();
+  }
+  $('savedViews').onchange=()=>{renderLibrary();const entry=selectedView();if(entry)$('viewName').value=entry.name;};
   $('saveView').onclick=()=>{
-    try{localStorage.setItem('klassenampel-view',JSON.stringify(snapshot()));notice('Die komplette Einrichtung ist in diesem Browser gespeichert.');}
-    catch{notice('Speicherung gesperrt. Bitte die Ansicht als HTML exportieren.');}
+    const name=viewName()||'Ansicht '+(library.length+1),config=snapshot();
+    const entry={id:crypto.randomUUID?.()??Date.now().toString(36)+Math.random().toString(36).slice(2),name,config};
+    if(saveLibrary([...library,entry],entry.id,'„'+name+'“ gespeichert. Über „Ansicht öffnen“ jederzeit wieder aufrufen.')){$('viewName').value=name;rememberCurrent(config);}
   };
+  $('loadView').onclick=()=>{
+    const entry=selectedView();if(!entry)return;
+    undoOpen=structuredClone(snapshot());restore(structuredClone(entry.config));rememberCurrent(snapshot());
+    $('undoLoadView').disabled=false;notice('„'+entry.name+'“ geöffnet. Spielrunde und Countdown sind pausiert.');
+  };
+  $('undoLoadView').onclick=()=>{if(!undoOpen)return;restore(undoOpen);undoOpen=null;$('undoLoadView').disabled=true;rememberCurrent(snapshot());notice('Die vorherige Arbeitsansicht wurde wiederhergestellt.');};
+  $('replaceView').onclick=()=>{
+    const entry=selectedView();if(!entry||!confirm('„'+entry.name+'“ mit der aktuellen Ansicht ersetzen?'))return;
+    const config=snapshot();if(saveLibrary(library.map(item=>item.id===entry.id?{...item,config}:item),entry.id,'Gespeicherte Ansicht aktualisiert.'))rememberCurrent(config);
+  };
+  $('renameView').onclick=()=>{
+    const entry=selectedView(),name=viewName();if(!entry)return;if(!name){notice('Bitte oben einen Namen eingeben.');return;}
+    saveLibrary(library.map(item=>item.id===entry.id?{...item,name}:item),entry.id,'Ansicht umbenannt.');
+  };
+  $('deleteView').onclick=()=>{
+    const entry=selectedView();if(!entry||!confirm('„'+entry.name+'“ aus der Sammlung löschen?'))return;
+    saveLibrary(library.filter(item=>item.id!==entry.id),'','Ansicht aus der Sammlung gelöscht. Die aktuelle Arbeitsfläche bleibt erhalten.');
+  };
+  initializeLibrary();
   function exportHtml() {
     const clone=document.documentElement.cloneNode(true);
     window.moduleLayout?.prepareExport(clone);
@@ -300,6 +357,8 @@
     const data=document.createElement('script');data.id='viewConfig';data.type='application/json';
     data.textContent=JSON.stringify(snapshot()).replaceAll('<','\\u003c');
     clone.querySelector('head').append(data);
+    clone.querySelector('#savedViews').replaceChildren();clone.querySelector('#viewName').value='';
+    for(const id of ['loadView','replaceView','renameView','deleteView','undoLoadView'])clone.querySelector('#'+id).disabled=true;
     clone.querySelector('#shareLink').value='';clone.querySelector('#shareLink').hidden=true;
     return '<!doctype html>\n'+clone.outerHTML;
   }
