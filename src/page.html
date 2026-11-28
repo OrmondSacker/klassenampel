@@ -1,5 +1,5 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.5.3</title><style>/* STYLE */</style><script id="pdfRuntime" type="application/json">/* PDF_RUNTIME */</script></head><body><main>
-<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.5.3</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="swapFocus" type="button" aria-label="Tafel und Spielwelt tauschen">Tafel im Mittelpunkt</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102337"><title>KlassenAmpel 0.6.0</title><style>/* STYLE */</style><script id="pdfRuntime" type="application/json">/* PDF_RUNTIME */</script></head><body><main>
+<header class="masthead"><div class="brand"><span class="brand-lights" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>KlassenAmpel <small>0.6.0</small></h1><p>Leise arbeiten. Welten entdecken.</p></div></div><div class="actions"><button id="menuToggle" aria-expanded="false" aria-controls="workspaceMenu">Module & Einstellungen ▾</button><button id="swapFocus" type="button" aria-label="Tafel und Spielwelt tauschen">Tafel im Mittelpunkt</button><button id="projector" aria-pressed="false">Präsentation</button><button id="fullscreen">Vollbild</button><button id="exitScreensaver" hidden aria-label="Bildschirmschoner beenden">↩</button></div></header>
 <section id="workspaceMenu" class="workspace-menu" hidden aria-label="Module und Einstellungen"><div class="menu-heading"><strong>Dein Arbeitsplatz</strong><button id="menuClose" aria-label="Menü schließen">×</button></div><div class="menu-grid"><section><h2>Anzeigen</h2><div id="moduleChoices"></div><div class="actions"><button id="autoArrange">Automatisch anordnen</button><button id="layoutUndo" disabled>Anordnung zurück</button></div><label for="layoutPreset">Anordnung</label><select id="layoutPreset"><option value="world">Spielwelt im Mittelpunkt</option><option value="task">Aufgabe & Uhr</option><option value="board">Tafel im Mittelpunkt</option></select><details class="panel" data-setting="modules" id="details-modules">
         <summary>Anzeigen im Detail</summary>
         <div class="row" hidden><label for="showTask">Aufgabenbox anzeigen</label><input id="showTask" type="checkbox" checked></div>
@@ -12,15 +12,13 @@
         <p class="hint">Boxen am Griff in die Spielwelt oder nach außen ziehen.</p>
       </details></section><section><h2>Unterricht</h2><details class="panel" data-setting="teaching" id="details-teaching">
       <summary id="teachingTitle">Unterricht</summary>
-      <div class="row"><label for="age">Unterrichtsmodus</label>
-        <select id="age"><option value="primary">Grundschule</option><option value="college">Berufskolleg</option></select>
-      </div>
+
       <div class="row"><label for="work">Arbeitsform</label>
         <select id="work"><option value="silent">Stillarbeit</option><option value="pair">Partnerarbeit</option><option value="group">Gruppenarbeit</option></select>
       </div>
       <p class="hint">Die Arbeitsform stellt die Pegelgrenzen ein. Der Punktestand gilt für alle fünf Welten und beide Grafikstile.</p>
     </details><details class="panel" data-setting="penalties" id="details-penalties">
-      <summary>Konsequenzen</summary>
+      <summary>Konsequenzen</summary><div class="row"><label for="penaltyProfile">Konsequenzprofil</label><select id="penaltyProfile"><option value="primary">Profil A</option><option value="college">Profil B</option></select></div>
       <div class="row"><label for="penEnabled">Modul aktiv</label><input type="checkbox" id="penEnabled" checked></div>
       <div class="row"><label for="penPoints">Punkte abziehen</label><input type="checkbox" id="penPoints" checked></div>
       <div class="row"><label for="penWorld">Spielwelt-Rückschritt</label><input type="checkbox" id="penWorld" checked></div>
@@ -29,7 +27,7 @@
       <div class="row"><label for="penCooldown">Schutzpause</label><select id="penCooldown"><option value="10">10 Sekunden</option><option value="20" selected>20 Sekunden</option><option value="30">30 Sekunden</option></select></div>
       <p id="penStatus" class="hint"></p>
       <button id="undoPenalty" disabled>Letzte Konsequenz rückgängig</button>
-      <p class="hint">Die Einstellungen werden je Unterrichtsmodus gespeichert. Für den Weltrückschritt kann der Abzug höher ausfallen.</p>
+      <p class="hint">Die Einstellungen werden je Konsequenzprofil gespeichert. Für den Weltrückschritt kann der Abzug höher ausfallen.</p>
     </details><details class="panel" data-setting="calibration" id="details-calibration">
       <summary>Mikrofon abgleichen</summary>
       <label class="slider" for="sensitivity">Verstärkung <span id="sensVal">5×</span></label>
@@ -48,7 +46,7 @@
     <button data-world="space"><span aria-hidden="true">🚀</span> Weltraum</button>
     <button data-world="fantasy"><span aria-hidden="true">🏰</span> Fantasy</button>
     <button data-world="nature"><span aria-hidden="true">🌿</span> Natur</button>
-  </nav><div id="neutralOptions" hidden aria-label="Optionen für den neutralen Modus">
+  </nav><div class="row"><label for="age">Grafikstil</label><select id="age"><option value="primary">Verspielt</option><option value="college">Retro</option></select></div><p class="hint">Zwei eigenständige Gestaltungen. Die Grafik ändert weder Spielstand noch Konsequenzen.</p><div id="neutralOptions" hidden aria-label="Optionen für den neutralen Modus">
       <div class="row"><label for="neutralAnimation">Langsame Hintergrundbewegung</label><input id="neutralAnimation" type="checkbox"></div>
       <button id="startScreensaver" type="button">Bildschirmschoner starten</button>
       <p class="hint">Ruhige Formen im neutralen Modus. Mit ↩ oder Escape zurück zur Bedienansicht.</p>
@@ -98,7 +96,7 @@
 
         <div class="world-heading">
           <div>
-            <div id="styleName" class="style-name">Cartoon</div>
+            <div id="styleName" class="style-name">Verspielt</div>
             <h2 id="worldTitle" hidden>Aquarium</h2>
             <p id="worldDesc">Ein Riff voller Leben</p>
           </div>

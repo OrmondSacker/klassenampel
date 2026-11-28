@@ -49,6 +49,7 @@ function discoveryName(world,index) {
 
 function createWorldRenderer(canvas) {
   const g = canvas.getContext('2d');
+  const renderRetro=createRetroWorldRenderer(canvas);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const lavaCanvas=document.createElement('canvas'), lavaContext=lavaCanvas.getContext('2d');
   let lavaTime=-Infinity,lavaColor=[92,125,151];
@@ -804,7 +805,9 @@ function createWorldRenderer(canvas) {
   return function render(now,key,isPixel,count,worldEvent,neutralAnimation=false,signal='idle') {
     const cssWidth=canvas.clientWidth, cssHeight=canvas.clientHeight;
     if (!cssWidth || !cssHeight) return;
-    pixel=isPixel&&key!=='lava';
+    if(isPixel&&worlds[key].finds.length){renderRetro(now,key,count,worldEvent);return;}
+    canvas.dataset.renderer='playful';
+    pixel=false;
     const density=pixel ? .34 : Math.min(devicePixelRatio||1,2);
     const width=Math.max(1,Math.round(cssWidth*density));
     const height=Math.max(1,Math.round(cssHeight*density));

@@ -4,6 +4,12 @@ Stand ist der 27. November 2026. Diese Roadmap wurde nach der Bestandsaufnahme i
 
 ## Zuletzt umgesetzte Nutzeranforderungen
 
+### Version 0.6.0 – unabhängige Grafikstile
+
+„Verspielt“ und „Retro“ ersetzen die Schulform-Bezeichnungen. Alle fünf Retro-Spielwelten besitzen neue, unabhängige Pixel-Kompositionen und Animationen. Der bisherige Ansatz, dieselbe Welt nur mit weniger Auflösung darzustellen, ist verworfen. Grafikstil und Konsequenzprofil sind entkoppelt; beide alten Profile und gespeicherte Ansichten bleiben nutzbar.
+
+Alle 13 Fortschrittsstände jeder Retro-Welt und beide Stile werden visuell beziehungsweise im Browser geprüft. Weiterer Grafikfeinschliff soll auf konkrete Beobachtungen auf den Unterrichtsgeräten reagieren; neue Welten oder neue Spielregeln sind nicht Teil dieses Auftrags.
+
 ### Version 0.5.3 – Tafel und Spielwelt direkt wechseln
 
 Direkter Fokus-Schalter, klickbare Arbeitsform, erweiterte Text-/Pinselwerkzeuge, Objektskalierung und echte Ebenen sowie lokale PDF-Seitenauswahl sind umgesetzt. Keine separate Tafelansicht und keine neue Spielmechanik. PDF-Seiten werden als Bilder gespeichert, nicht als editierbare PDF-Dokumente.

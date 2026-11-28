@@ -359,3 +359,8 @@ details.movable-module > summary { padding-left: 30px; padding-right: 24px; min-
 #whiteboardModule:not(.text-selected) #whiteboardFontSize,#whiteboardModule:not(.text-selected) label[for=whiteboardFontSize] {display:none;}
 
 @media(max-width:575px){.masthead .actions{gap:6px;}.masthead .actions button{padding:7px 9px;font-size:.85rem;}#swapFocus{font-size:0;}#swapFocus::after{content:attr(data-short);font-size:.85rem;}}
+
+/* Retro has its own artwork; UI text remains readable and configurable. */
+.pixel .world::before {background:none;}
+.pixel.city-view .world-heading p,.pixel.city-view .style-name {color:#e0edf2;text-shadow:none;}
+.pixel .world {border-color:#607c92;}

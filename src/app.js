@@ -19,7 +19,8 @@
   const penaltyProfiles = {...read('klassenampel-penalties-v03')};
   const state = {
     world:Object.hasOwn(worlds,saved.world)?saved.world:'aquarium',
-    age:modes.includes(saved.age)?saved.age:'primary',
+    age:saved.style==='retro'?'college':saved.style==='playful'?'primary':modes.includes(saved.age)?saved.age:'primary',
+    penaltyProfile:modes.includes(saved.penaltyProfile)?saved.penaltyProfile:modes.includes(saved.age)?saved.age:'primary',
     work:Object.hasOwn(profiles,saved.work)?saved.work:'silent',
     score:Number.isFinite(saved.score)?Math.floor(clamp(saved.score,0,999999)):0,
     remaining:900, elapsed:0, green:0, fraction:0, phase:'ready',
@@ -36,8 +37,8 @@
   const hasInput = () => Boolean(demo || (audio?.ctx.state==='running' && !audio.track.muted && audio.track.readyState==='live'));
 
   function save() {
-    const {world,age,work,score}=state;
-    write('klassenampel-v02',{world,age,work,score});
+    const {world,age,work,score,penaltyProfile}=state;
+    write('klassenampel-v02',{world,age,style:age==='college'?'retro':'playful',work,score,penaltyProfile});
   }
   function announce(message) { $('announcement').textContent=message; }
   function update() {
@@ -99,7 +100,7 @@
     $('actionStatus').textContent=worlds[state.world].event;
   }
   function loadPenalty() {
-    const p={...defaults,...penaltyProfiles[state.age]};
+    const p={...defaults,...penaltyProfiles[state.penaltyProfile]};
     $('penEnabled').checked=Boolean(p.enabled);
     $('penPoints').checked=Boolean(p.points);
     $('penWorld').checked=Boolean(p.world);
@@ -309,14 +310,16 @@
   }
   function setMode() {
     document.body.classList.toggle('pixel',$('age').value==='college');
-    $('styleName').textContent=state.age==='college'?'Pixel-Art':'Cartoon';
+    $('styleName').textContent=state.age==='college'?'Retro':'Verspielt';
   }
   $('age').value=state.age;
   $('work').value=state.work;
   $('age').onchange=()=>{
     state.age=$('age').value;
-    loadPenalty(); setMode(); save();
+    setMode(); save();
   };
+  $('penaltyProfile').value=state.penaltyProfile;
+  $('penaltyProfile').onchange=()=>{state.penaltyProfile=$('penaltyProfile').value;loadPenalty();save();};
   $('work').onchange=()=>{ state.work=$('work').value; applyWorkProfile(); save(); };
   $('sensitivity').oninput=sliders;
   $('threshold').oninput=()=>{
@@ -329,7 +332,7 @@
   };
   penaltyIds.forEach(id=>$(id).onchange=()=>{
     syncPenalty();
-    penaltyProfiles[state.age]=pen;
+    penaltyProfiles[state.penaltyProfile]=pen;
     write('klassenampel-penalties-v03',penaltyProfiles);
   });
   $('undoPenalty').onclick=()=>{
@@ -424,8 +427,10 @@
   setWorld(state.world);
   loadPenalty();
   window.klassenampel={
-    snapshot:()=>({world:state.world,score:state.score,remaining:state.remaining,elapsed:state.elapsed,green:state.green,previewCount:state.previewCount}),
+    snapshot:()=>({world:state.world,style:state.age==='college'?'retro':'playful',penaltyProfile:state.penaltyProfile,score:state.score,remaining:state.remaining,elapsed:state.elapsed,green:state.green,previewCount:state.previewCount}),
     restore:game=>{
+      if(['playful','retro'].includes(game.style)){state.age=game.style==='retro'?'college':'primary';$('age').value=state.age;setMode();}
+      if(modes.includes(game.penaltyProfile)&&state.penaltyProfile!==game.penaltyProfile){state.penaltyProfile=game.penaltyProfile;$('penaltyProfile').value=state.penaltyProfile;loadPenalty();}
       if(Object.hasOwn(worlds,game.world)) setWorld(game.world);
       if(Number.isFinite(game.score)) state.score=Math.floor(clamp(game.score,0,999999));
       if(Number.isFinite(game.remaining)) state.remaining=clamp(game.remaining,0,3600);

@@ -9,7 +9,7 @@ Diese Datei liegt seit der Zusammenführung am 26. November 2026 an der Reposito
 1. Die Anwendung und die Kommunikation mit dem Nutzer sind deutschsprachig und verständlich zu halten.
 2. Mikrofonmessung und Ampel sind Kernfunktionen. Grafikänderungen müssen die funktionierende Messung erhalten.
 3. Die fünf Spielwelten Aquarium, Städtebau, Weltraum, Fantasy und Natur müssen erhalten bleiben.
-4. Grundschule und Berufskolleg verwenden dieselbe Spielmechanik. Grundschule erhält eine freundliche Cartoon-Darstellung, Berufskolleg Pixel-Art.
+4. Grafikstile heißen „Verspielt“ und „Retro“, ohne Zuordnung zu Schulformen. Verspielt behält die freundliche Darstellung. Retro besitzt einen vollständig unabhängigen Renderer mit eigenen Kompositionen, Paletten, Sprites und Animationen für alle fünf Welten. Die verspielte Darstellung nicht für Retro herunterskalieren oder lediglich verpixeln. Spielregeln und Freischaltungen bleiben identisch. Konsequenzprofile werden unabhängig vom Grafikstil gewählt; alte Ansichten und beide bisherigen Profile migrieren.
 5. Neutraler Modus und Raketen-Lavalampe ergänzen die Spielwelten. Der Bildschirmschoner ist ausschließlich innerhalb des gewählten neutralen Modus aktivierbar und besitzt keinen eigenen Menüpunkt.
 6. Grün bringt während einer laufenden Runde einen Punkt pro Sekunde. Alle 30 Punkte entsteht Fortschritt. Gelb und Rot pausieren die Punktevergabe.
 7. Das optionale Konsequenzmodul bleibt abschaltbar und konfigurierbar. Vorgabe sind fünf Sekunden durchgehend Rot, mittlere Stärke und 20 Sekunden Schutzpause.

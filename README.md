@@ -1,8 +1,8 @@
 # KlassenAmpel
 
-Version 0.5.3, Stand 27. November 2026. Die bisherige Version 0.4 wurde in fünf zusammengehörige Arbeitsmodule und ein zentrales Menü überführt.
+Version 0.6.0, Stand 27. November 2026. Die bisherige Version 0.4 wurde in fünf zusammengehörige Arbeitsmodule und ein zentrales Menü überführt.
 
-Die KlassenAmpel ist eine deutschsprachige Web-App für den Unterricht. Sie verbindet eine Mikrofon-Lautstärkeampel mit einer Spielrunde, gemeinsamem Fortschritt, Aufgabenfeld und unabhängigem Aufgaben-Countdown. Sie richtet sich an Grundschule und Berufskolleg und soll auf Unterrichtsrechnern, interaktiven Tafeln sowie mobilen Geräten nutzbar sein.
+Die KlassenAmpel ist eine deutschsprachige Web-App für den Unterricht. Sie verbindet eine Mikrofon-Lautstärkeampel mit einer Spielrunde, gemeinsamem Fortschritt, Aufgabenfeld und unabhängigem Aufgaben-Countdown. Sie richtet sich an unterschiedliche Lerngruppen und soll auf Unterrichtsrechnern, interaktiven Tafeln sowie mobilen Geräten nutzbar sein.
 
 ## Übergabe lesen
 
@@ -62,7 +62,9 @@ Die Lavalampe reagiert schon bei aktiver Messung oder Demo auf die Ampelfarbe. E
 | Neutral | Ruhige Ansicht; Hintergrundbewegung und Bildschirmschoner direkt bei ausgewähltem Neutral-Modus aktivierbar |
 | Lavalampe | Klassische Raketenform mit fließender Lava in der aktuellen Ampelfarbe |
 
-Grundschule und Berufskolleg verwenden dieselben Spielregeln. Die Spielwelten werden für das Berufskolleg in Pixel-Art dargestellt. Die Lavalampe wird bewusst glatt gezeichnet.
+Unter „Darstellung → Spielwelt wählen → Grafikstil“ stehen „Verspielt“ und „Retro“ zur Auswahl. Verspielt behält die bisherige freundliche Gestaltung. Retro verwendet fünf unabhängig komponierte Pixelwelten: Unterwasserstation, nächtliche Hafenstadt, orbitales Dock, RPG-Weltkarte und Waldlichtung. Es wird keine verkleinerte oder verpixelte Kopie der verspielten Welt gezeichnet. Beide Stile nutzen dieselben Spielregeln und Freischaltungen. Neutral und Lavalampe behalten ihre eigene Darstellung.
+
+Die Grafikwahl verändert keine Konsequenzen. Die beiden bisherigen Einstellungsprofile bleiben unter „Konsequenzen → Konsequenzprofil“ als Profil A/B erhalten und lassen sich unabhängig vom Stil wählen. Ältere gespeicherte Ansichten werden automatisch zugeordnet.
 
 ## Maßgebliches Repository
 
@@ -72,6 +74,7 @@ Der aktuelle Entwicklungsstand ist im lokalen Repository `work/klassenampel/` zu
 | --- | --- |
 | `src/page.html` | HTML-Struktur und Bedienelemente |
 | `src/page.css` | Layout, Schrift, Modulansichten und Präsentationsmodi |
+| `src/retro.js` | Eigenständige Retro-Kompositionen, Pixel-Sprites und Animationen |
 | `src/worlds.js` | Weltkatalog und Canvas-Grafik einschließlich Lavalampe |
 | `src/app.js` | Mikrofon, Ampel, Spielrunde, Punkte, Konsequenzen, Vorschau |
 | `src/classroom.js` | Aufgabenmodul, Countdown, Signalton, Drag-and-drop, Export und Einstellungen |
@@ -96,11 +99,12 @@ node scripts/build.cjs
 
 Das Skript liest HTML und CSS ein und fügt die JavaScript-Dateien in dieser Reihenfolge zusammen.
 
-1. `worlds.js`
-2. `app.js`
-3. `classroom.js`
-4. `modules.js`
-5. `whiteboard.js`
+1. `retro.js`
+2. `worlds.js`
+3. `app.js`
+4. `classroom.js`
+5. `modules.js`
+6. `whiteboard.js`
 
 Die Ausgabe wird nach `index.html` an der Repository-Wurzel geschrieben. Der Build benötigt ausschließlich die Dateien im Repository.
 
@@ -127,7 +131,7 @@ node tests/browser-check.cjs
 Remove-Item Env:ALARM_ONLY
 ```
 
-Weitere gezielte Modi sind `BOARD_PLUS_ONLY`, `TIME_TASK_ONLY`, `LIBRARY_ONLY`, `VERSION5_ONLY`, `DOCK_TEXT_ONLY`, `TEXT_INPUT_ONLY`, `MODULES_ONLY`, `LAVA_ONLY`, `SCREENSAVER_ONLY`, `PREVIEW_ONLY`, `WORLDS_ONLY`, `CITY_ONLY`, `BACKGROUND_ONLY` und `FONTS_ONLY`. Nur den gewünschten Schalter setzen und danach wieder entfernen. Das Skript beendet sich beim ersten zutreffenden Modus. Diese Schalter sind Teststeuerung und keine App-Konfiguration.
+Weitere gezielte Modi sind `RETRO_ONLY`, `BOARD_PLUS_ONLY`, `TIME_TASK_ONLY`, `LIBRARY_ONLY`, `VERSION5_ONLY`, `DOCK_TEXT_ONLY`, `TEXT_INPUT_ONLY`, `MODULES_ONLY`, `LAVA_ONLY`, `SCREENSAVER_ONLY`, `PREVIEW_ONLY`, `WORLDS_ONLY`, `CITY_ONLY`, `BACKGROUND_ONLY` und `FONTS_ONLY`. Nur den gewünschten Schalter setzen und danach wieder entfernen. Das Skript beendet sich beim ersten zutreffenden Modus. Diese Schalter sind Teststeuerung und keine App-Konfiguration.
 
 Der Gesamtlauf ohne Schalter ist historisch gewachsen. Am 26.11.2026 endete er einschließlich simuliertem Mikrofon mit Exitcode 0. Zusätzlich waren ALARM_ONLY, LAVA_ONLY, SCREENSAVER_ONLY, PREVIEW_ONLY, BACKGROUND_ONLY und FONTS_ONLY erfolgreich. Ein älterer Lauf war zuvor bei der simulierten Mikrofonfreigabe stehengeblieben. Die aktuellen Ergebnisse ersetzen keine Erprobung auf realer Unterrichtshardware.
 

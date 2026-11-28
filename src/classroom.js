@@ -5,7 +5,7 @@
   const defaults={taskModule:{x:.03,y:.14},countdownModule:{x:.72,y:.14}};
   const moduleState={taskModule:{collapsed:false,outside:true},countdownModule:{collapsed:false,outside:true}};
   let layout=structuredClone(defaults), remaining=300, countdownTotal=300, deadline=0, running=false, draggingId=null;
-  const controls=['age','work','duration','sensitivity','threshold','yellowLimit','penEnabled','penPoints','penWorld','penDelay','penStrength','penCooldown','showTask','showCountdown','showHud','showDiscovery','fontFamily','uiFontSize','taskFontSize','clockFontSize','neutralAnimation','countdownSound','showWorkMode','showFollowUp','showCountdownProgress'];
+  const controls=['age','penaltyProfile','work','duration','sensitivity','threshold','yellowLimit','penEnabled','penPoints','penWorld','penDelay','penStrength','penCooldown','showTask','showCountdown','showHud','showDiscovery','fontFamily','uiFontSize','taskFontSize','clockFontSize','neutralAnimation','countdownSound','showWorkMode','showFollowUp','showCountdownProgress'];
   let alarmContext=null,alarmVersion=0,alarmNodes=[];
   try {
     const savedSound=localStorage.getItem('klassenampel-countdown-sound');
@@ -277,7 +277,7 @@
   function snapshot() {
     countdown();
     return {
-      version:1,appVersion:'0.5.3',task:task.value,followUpTask:$('followUpTask').value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,countdownTotal,
+      version:1,appVersion:'0.6.0',task:task.value,followUpTask:$('followUpTask').value,layout,moduleState,countdownMinutes:Number($('countdownMinutes').value),remaining,countdownTotal,
       game:window.klassenampel.snapshot(),
       controls:Object.fromEntries(controls.map(id=>[id,$(id).type==='checkbox'?$(id).checked:$(id).value])),
       projector:document.body.classList.contains('projector'),
@@ -298,6 +298,7 @@
     $('showFollowUp').checked=config.controls?.showFollowUp===true;
     $('showCountdownProgress').checked=config.controls?.showCountdownProgress!==false;
     if(typeof config.task==='string') task.value=config.task.slice(0,2000);
+    if(!config.controls?.penaltyProfile&&['primary','college'].includes(config.controls?.age)){$('penaltyProfile').value=config.controls.age;$('penaltyProfile').dispatchEvent(new Event('change'));}
     for(const id of controls) {
       const el=$(id),val=config.controls?.[id];
       if(val===undefined) continue;

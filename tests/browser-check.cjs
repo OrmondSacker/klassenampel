@@ -105,6 +105,45 @@ async function verify() {
     assert.equal(await value('penDelay'),'5');
     assert.equal(await value('penStrength'),'medium');
     assert.equal(await value('penCooldown'),'20');
+    if(process.env.RETRO_ONLY) {
+      assert.deepEqual(await evaluate("[...document.getElementById('age').options].map(option=>option.textContent)"),['Verspielt','Retro']);
+      await change('penStrength','value','mild');await change('penEnabled','checked',false);await click('#demo');await click('#play');await click('#countdownStart');
+      await change('age','value','college');await step(.1);assert.equal(await label('styleName'),'Retro');assert.equal(await evaluate("document.getElementById('scene').dataset.renderer"),'retro');
+      assert.equal(await evaluate("document.getElementById('penEnabled').checked"),false);assert.equal(await value('penStrength'),'mild');assert.equal(await label('play'),'Pause');assert.equal(await label('countdownStart'),'Countdown pausieren');
+      await click('#play');await click('#countdownStart');const initialScore=await score();
+      await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+      await evaluate("window.retroGradientCalls=0;const context=document.getElementById('scene').getContext('2d');window.originalGradient=context.createLinearGradient;context.createLinearGradient=function(){retroGradientCalls++;return originalGradient.apply(this,arguments)}");
+      const previews=[],progression=[];
+      for(const world of ['aquarium','city','space','fantasy','nature']){
+        await click('[data-world='+world+']');const frames=[];
+        for(let count=0;count<=12;count++){
+          await change('unlockPreview','value',String(count));await step(.1);const frame=await evaluate("document.getElementById('scene').toDataURL()");frames.push(frame);progression.push({world,count,src:frame});
+          if([0,6,12].includes(count))fs.writeFileSync(path.join(__dirname,'retro-'+world+'-'+count+'.png'),Buffer.from(frame.split(',')[1],'base64'));
+        }
+        assert.equal(new Set(frames).size,13,world+' must have 13 visibly different progression states');previews.push({world,src:frames[12]});
+        await step(1);assert.equal(await evaluate("document.getElementById('scene').toDataURL()"),frames[12],'Reduced motion must freeze retro animation');assert.equal(await score(),initialScore);
+      }
+      assert.equal(await evaluate('retroGradientCalls'),0,'Independent retro path must not call playful canvas gradients');
+      await evaluate("document.getElementById('scene').getContext('2d').createLinearGradient=originalGradient");
+      const montage=await evaluate(`(async()=>{const scenes=${JSON.stringify(previews)};const c=document.createElement('canvas');c.width=1200;c.height=1170;const ctx=c.getContext('2d');ctx.fillStyle='#101e2e';ctx.fillRect(0,0,c.width,c.height);for(let i=0;i<scenes.length;i++){const image=new Image();image.src=scenes[i].src;await image.decode();const x=i%2*600,y=Math.floor(i/2)*390;ctx.imageSmoothingEnabled=false;ctx.drawImage(image,x,y+30,600,360);ctx.fillStyle='#dcebf0';ctx.font='18px system-ui';ctx.fillText(scenes[i].world+' · Retro · Stufe 12',x+14,y+22);}return c.toDataURL()})()`);
+      fs.writeFileSync(path.join(__dirname,'retro-overview.png'),Buffer.from(montage.split(',')[1],'base64'));
+      const stages=await evaluate(`(async()=>{const scenes=${JSON.stringify(progression)};const c=document.createElement('canvas');c.width=1950;c.height=650;const ctx=c.getContext('2d');ctx.fillStyle='#101e2e';ctx.fillRect(0,0,c.width,c.height);for(let i=0;i<scenes.length;i++){const image=new Image();image.src=scenes[i].src;await image.decode();const x=i%13*150,y=Math.floor(i/13)*130;ctx.imageSmoothingEnabled=false;ctx.drawImage(image,x,y+20,150,100);ctx.fillStyle='#dcebf0';ctx.font='12px system-ui';ctx.fillText(scenes[i].world+' '+scenes[i].count,x+3,y+14);}return c.toDataURL()})()`);
+      fs.writeFileSync(path.join(__dirname,'retro-progression.png'),Buffer.from(stages.split(',')[1],'base64'));
+      await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+      for(const world of ['aquarium','city','space','fantasy','nature']){
+        await click('[data-world='+world+']');await change('unlockPreview','value','12');await step(.1);const before=await evaluate("document.getElementById('scene').toDataURL()");await step(1);assert.notEqual(await evaluate("document.getElementById('scene').toDataURL()"),before,world+' animates');await click('#worldAction');await step(.1);assert((await label('actionStatus')).length>10);
+        await change('age','value','primary');await step(.1);assert.equal(await label('styleName'),'Verspielt');assert.equal(await evaluate("document.getElementById('scene').dataset.renderer"),'playful');assert.notEqual(await evaluate("document.getElementById('scene').toDataURL()"),before);await change('age','value','college');await step(7);
+      }
+      await evaluate("document.getElementById('viewName').value='Retro-Vorlage'");await click('#saveView');await click('#shareView');const shared=await value('shareLink');const saved=await evaluate('classroomView.snapshot()');
+      fs.writeFileSync(path.join(__dirname,'retro-test.html'),await evaluate('classroomView.exportHtml()'));await send('Page.navigate',{url:pathToFileURL(path.join(__dirname,'retro-test.html')).href});await sleep(600);assert.equal(await label('styleName'),'Retro');assert.equal(await value('penStrength'),'mild');assert.equal(await evaluate("document.getElementById('penEnabled').checked"),false);
+      await send('Page.navigate',{url:shared});await sleep(600);assert.equal(await evaluate('klassenampel.snapshot().style'),'retro');assert.deepEqual(await evaluate('classroomView.snapshot().controls'),saved.controls);
+      const legacy=structuredClone(saved);delete legacy.game.style;delete legacy.game.penaltyProfile;delete legacy.controls.penaltyProfile;legacy.controls.age='college';legacy.controls.penStrength='strong';
+      await send('Page.navigate',{url:'about:blank'});await send('Page.navigate',{url:url+'#ansicht='+encodeURIComponent(JSON.stringify(legacy))});await sleep(600);assert.equal(await label('styleName'),'Retro');assert.equal(await value('penaltyProfile'),'college');assert.equal(await value('penStrength'),'strong');
+      await change('age','value','primary');assert.equal(await value('penStrength'),'strong');
+      await change('age','value','college');await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});await sleep(250);
+      for(const world of ['aquarium','city','space','fantasy','nature']){await click('[data-world='+world+']');await change('unlockPreview','value','12');await step(.1);assert((await evaluate('document.documentElement.scrollWidth'))<=390);await shot('retro-mobile-'+world);}
+      assert.deepEqual(errors,[]);console.log('0.6.0: independent retro scenes, all 65 progression states, motion/actions, separate consequence profiles, legacy views, HTML/link and mobile verified.');return;
+    }
     if(process.env.BOARD_PLUS_ONLY) {
       await click('#demo');await click('#play');await click('#countdownStart');await step(1);
       const oldTime=await label('timeLeft');
@@ -233,7 +272,7 @@ async function verify() {
       assert.deepEqual(errors,[]);console.log('Bibliothek: mehrere Ansichten, direktes Öffnen mit Tafel/Layout/Timer, Rückgängig, Umbenennen/Ersetzen/Löschen, Speicherfehler, Neustart und Altdatenübernahme geprüft.');return;
     }
     if(process.env.VERSION5_ONLY) {
-      assert.equal(await evaluate("document.title"),'KlassenAmpel 0.5.3');
+      assert.equal(await evaluate("document.title"),'KlassenAmpel 0.6.0');
       assert.equal(await evaluate("document.querySelectorAll('[data-board]').length"),5);
       assert(await evaluate("document.querySelector('[data-board=mainScreen]').contains(document.getElementById('roundSettings'))"));
       assert(await evaluate("document.querySelector('[data-board=mainScreen]').contains(document.querySelector('.discovery'))"));
@@ -749,8 +788,12 @@ async function verify() {
     await change('penEnabled','checked',false);
     await change('age','value','college');
     assert.equal(await value('age'),'college');
+    assert.equal(await evaluate("document.getElementById('penEnabled').checked"),false);
+    await change('penaltyProfile','value','college');
     assert.equal(await evaluate("document.getElementById('penEnabled').checked"),true);
     await change('age','value','primary');
+    assert.equal(await evaluate("document.getElementById('penEnabled').checked"),true);
+    await change('penaltyProfile','value','primary');
     assert.equal(await evaluate("document.getElementById('penEnabled').checked"),false);
     await click('#play');
     await click('[data-demo=red]');
@@ -801,7 +844,8 @@ async function verify() {
     const fullWidth=await evaluate("document.getElementById('scene').width");
     await change('age','value','primary');
     await step(.1);
-    assert(await evaluate("document.getElementById('scene').width") > fullWidth*2);
+    assert.equal(await evaluate("document.getElementById('scene').dataset.renderer"),'playful');
+    assert.notEqual(await evaluate("document.getElementById('scene').width"),fullWidth);
     await click('#projector');
     assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-board=microphone]')).display"),'none');
     await click('#projector');
